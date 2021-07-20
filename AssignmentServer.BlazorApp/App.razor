@@ -1,0 +1,11 @@
+﻿<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>존재하지 않는 페이지입니다. TA에게 문의해 주세요!</p>
+            <p>설마 공격을 시도하시고 계신건 아니죠?</p>
+        </LayoutView>
+    </NotFound>
+</Router>
