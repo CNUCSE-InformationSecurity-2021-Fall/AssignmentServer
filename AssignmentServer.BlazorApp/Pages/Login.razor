@@ -1,12 +1,82 @@
-﻿@page "/login"
+﻿@page   "/login"
 
+@inject ProtectedSessionStorage sessionStorage
+@inject NavigationManager       navManager
+
+<EditForm Model="@formData" OnSubmit="@OnSubmit">
+    <div class="login-window">
+        @if (errorState is not null)
+        {
+            <div class="alert alert-danger">@errorState.Message</div>
+        }
+
+        <div class="card">
+            <div class="card-header">학생 로그인</div>
+            <div class="card-body">
+                <div class="form-floating mb-3">
+                    <InputText type="text" class="form-control" id="StudentId" placeholder="Student ID"
+                               @bind-Value="formData.StudentId" />
+                    <label for="StudentId">학번</label>
+                </div>
+                <div class="form-floating">
+                    <InputText type="password" class="form-control" id="Password" placeholder="Password"
+                               @bind-Value="formData.Password" />
+                    <label for="Password">비밀번호</label>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-content-end">
+                <input class="btn btn-primary" type="submit" value="로그인" />
+            </div>
+        </div>
+    </div>
+</EditForm>
 
 @code {
-    [Parameter]
-    public string Id { get; set; }
+    LoginFormData formData;
+    LoginErrorState errorState;
+
+    private async Task OnSubmit()
+    {
+        var client   = new ApiClient(sessionStorage);
+        var response = await client.Post("/api/student/login", formData);
+        var data     = await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrEmpty(data))
+        {
+            errorState = new()
+            {
+                Message = "로그인 실패! 학번이나 비밀번호를 다시 확인해주세요."
+            };
+        }
+        else
+        {
+            errorState = null;
+
+            var result = JsonConvert.DeserializeObject<StudentInfo>(data);
+
+            if (result is null || !result.Valid)
+            {
+                errorState = new()
+                {
+                    Message = "로그인 실패! 조교에게 문의하세요!"
+                };
+
+                return;
+            }
+
+            await sessionStorage.SetAsync("token", result.Token);
+            navManager.NavigateTo("/dashboard", true);
+        }
+    }
 
     protected override Task OnInitializedAsync()
     {
+        formData = new LoginFormData()
+        {
+            StudentId = "",
+            Password = ""
+        };
+
         return base.OnInitializedAsync();
     }
 }

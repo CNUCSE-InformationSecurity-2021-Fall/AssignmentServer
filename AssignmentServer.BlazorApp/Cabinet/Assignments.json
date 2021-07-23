@@ -1,0 +1,26 @@
+﻿[
+  {
+    "Id": "Week1",
+    "Title": "1주차 과제",
+    "Summary": "패스워드를 재설정해봅시다",
+    "Due": "2021-07-30T12:00:00.030Z",
+    "MaxScore": 100,
+    "Visible": true
+  },
+  {
+    "Id": "Week2",
+    "Title": "끝난과제지릉",
+    "Summary": "패스워드를 재설정해봅시다",
+    "Due": "2021-07-01T12:00:00.030Z",
+    "MaxScore": 100,
+    "Visible": false
+  },
+  {
+    "Id": "Week3",
+    "Title": "니학점 좆됐지롱!",
+    "Summary": "패스워드를 재설정해봅시다",
+    "Due": "2021-07-01T12:00:00.030Z",
+    "MaxScore": 100,
+    "Visible": true
+  }
+]

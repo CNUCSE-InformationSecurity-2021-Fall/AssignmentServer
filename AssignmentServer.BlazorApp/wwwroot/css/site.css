@@ -12,6 +12,71 @@ a, .btn-link {
     align-items: center;
 }
 
+.nav-item-title {
+    display:flex;
+    flex-direction: column;
+}
+
+.nav-item-title span {
+    line-height: initial;
+}
+
+.rainbow-color {
+    animation: rainbow-background 1s infinite;
+}
+
+@keyframes rainbow-background {
+    0% {
+        background: #f00;
+    }
+
+    10% {
+        background: #ff7f00;
+    }
+
+    20% {
+        background: #ff0;
+    }
+
+    30% {
+        background: #0f0;
+    }
+
+    40% {
+        background: #00f;
+    }
+
+    50% {
+        background: #4b0082;
+    }
+
+    60% {
+        background: #9400d3
+    }
+
+    70% {
+        background: #4b0082;
+    }
+
+    80% {
+        background: #00f;
+    }
+
+    90% {
+        background: #0f0;
+    }
+
+    100% {
+        background: #ff0;
+    }
+
+}
+
+.login-window {
+    width: 500px;
+    height: auto;
+    margin: auto;
+}
 
 .btn-primary {
     color: #fff;

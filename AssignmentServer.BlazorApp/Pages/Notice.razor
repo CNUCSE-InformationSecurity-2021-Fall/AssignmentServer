@@ -1,0 +1,56 @@
+﻿@page "/notice"
+
+<div class=""></div>
+
+<table class="table w-100">
+    <thead>
+        <tr>
+            <th class="w-50">제목</th>
+            <th>작성자</th>
+            <th>작성일자</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var notice in notices)
+        {
+            <tr>
+                <td>
+                    <NavLink class="text-decoration-none" href=@string.Format("/notice/{0}", notice.Id)>
+                        @notice.Title
+                    </NavLink>
+
+                    @if (DateTime.Now < notice.Timestamp.AddDays(1))
+                    {
+                        <span class="badge rainbow-color mx-3">New</span>
+                    }
+                </td>
+                <td>
+                    @notice.Author
+                </td>
+                <td>
+                    @notice.Timestamp
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code 
+{
+    private List<NoticeData> notices = new ();
+
+    protected override Task OnInitializedAsync()
+    {
+        notices = Directory.GetFiles("Cabinet/Notices")
+                           .Select(file =>
+                           {
+                               var filename = Path.GetFileNameWithoutExtension(file);
+                               return new NoticeData(filename);
+                           })
+                           .Where(notice => notice.Valid)
+                           .OrderByDescending(notice => notice.Timestamp)
+                           .ToList();
+
+        return base.OnInitializedAsync();
+    }
+}
