@@ -65,5 +65,43 @@ namespace AssignmentServer.BlazorApp.Controllers
                    new StudentInfo(result) :
                    null;
         }
+
+        [HttpPost]
+        public PasswordChangeResultType UpdatePassword([FromBody]PasswordChangeFormData formData)
+        {
+            var user = new StudentInfo(_token);
+
+            if (!user.Valid)
+            {
+                return PasswordChangeResultType.LoginRevoked;
+            }
+            else if (formData.NewPassword != formData.NewPasswordConfirm) 
+            {
+                return PasswordChangeResultType.ConfirmFailure;
+            }
+
+            var cabinet = $"Cabinet/Students/{user.Id}/student.json";
+
+            if (!System.IO.File.Exists(cabinet))
+            {
+                return PasswordChangeResultType.UserNotFound;
+            }
+
+            var cabData = System.IO.File.ReadAllText(cabinet, Encoding.UTF8);
+            var result = JsonConvert.DeserializeObject<Student>(cabData);
+
+            if (!result.PasswordMatches(formData.Password))
+            {
+                return PasswordChangeResultType.PasswordNotMatch;
+            }
+
+            result.ToPassword(formData.NewPassword, true, true);
+            result.LastPasswordSet = DateTime.Now;
+
+            cabData = JsonConvert.SerializeObject(result);
+
+            System.IO.File.WriteAllText(cabinet, cabData, Encoding.UTF8);
+            return PasswordChangeResultType.Success;
+        }
     }
 }
