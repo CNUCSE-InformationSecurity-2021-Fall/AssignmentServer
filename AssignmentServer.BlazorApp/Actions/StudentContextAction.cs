@@ -37,7 +37,7 @@ namespace AssignmentServer.BlazorApp.Actions
             return null;
         }
 
-        public StudentInfo Login(LoginFormData formData)
+        public async Task<StudentInfo> Login(LoginFormData formData)
         {
             if (await Check() is not null)
                 return null;

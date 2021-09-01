@@ -38,7 +38,7 @@
     private async Task OnSubmit()
     {
         var action = new StudentContextAction(sessionStorage);
-        var result = action.Login(formData);
+        var result = await action.Login(formData);
 
         errorState = null;
 
