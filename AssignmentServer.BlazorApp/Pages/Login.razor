@@ -52,7 +52,7 @@
             return;
         }
 
-        await sessionStorage.SetAsync("token", result.Token);
+        await sessionStorage.SetAsync("Authorization", result.Token);
         navManager.NavigateTo("/dashboard", true);
     }
 

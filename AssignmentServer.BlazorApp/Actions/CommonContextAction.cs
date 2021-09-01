@@ -9,16 +9,12 @@ namespace AssignmentServer.BlazorApp.Actions
 {
     public abstract class CommonContextAction
     {
+        protected ProtectedBrowserStorage storage;
         protected StudentInfo currentUserInfo;
         
         public CommonContextAction(ProtectedBrowserStorage context) 
         {
-            var tokenResult = context.GetAsync<string>("Authorization")
-                                    .GetAwaiter().GetResult();
-
-            if (tokenResult.Success) {
-                currentUserInfo = new(tokenResult.Value);
-            }
+            storage = context;
         }
     }
 }

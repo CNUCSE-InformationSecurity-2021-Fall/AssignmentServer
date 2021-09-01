@@ -25,14 +25,21 @@ namespace AssignmentServer.BlazorApp.Actions
             
         }
 
-        public StudentInfo Check() 
+        public async Task<StudentInfo> Check() 
         {
-            return currentUserInfo;
+            var request = await storage.GetAsync<string>("Authorization");
+
+            if (request.Success)
+            {
+                return new StudentInfo(request.Value);
+            }
+
+            return null;
         }
 
         public StudentInfo Login(LoginFormData formData)
         {
-            if (currentUserInfo is not null)
+            if (await Check() is not null)
                 return null;
 
             Match match = StudentIdRegex.Match(formData.StudentId);
@@ -60,9 +67,11 @@ namespace AssignmentServer.BlazorApp.Actions
                    null;
         }
 
-        public PasswordChangeResultType UpdatePassword(PasswordChangeFormData formData)
+        public async Task<PasswordChangeResultType> UpdatePassword(PasswordChangeFormData formData)
         {
-            if (!currentUserInfo.Valid)
+            var currentUserInfo = await Check();
+
+            if (currentUserInfo is null || !currentUserInfo.Valid)
             {
                 return PasswordChangeResultType.LoginRevoked;
             }
@@ -91,7 +100,7 @@ namespace AssignmentServer.BlazorApp.Actions
 
             cabData = JsonConvert.SerializeObject(result);
 
-            System.IO.File.WriteAllText(cabinet, cabData, Encoding.UTF8);
+            File.WriteAllText(cabinet, cabData, Encoding.UTF8);
             return PasswordChangeResultType.Success;
         }
     }

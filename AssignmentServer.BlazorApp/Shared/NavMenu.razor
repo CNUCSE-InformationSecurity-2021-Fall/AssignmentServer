@@ -94,7 +94,7 @@
         {
             var action = new StudentContextAction(sessionStorage);
 
-            logged = action.Check() is not null;
+            logged = await action.Check() is not null;
             StateHasChanged();
         }
 
