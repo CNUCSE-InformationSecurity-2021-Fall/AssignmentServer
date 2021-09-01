@@ -92,11 +92,9 @@
     {
         if (firstRender)
         {
-            var client = new ApiClient(sessionStorage);
-            var response = await client.Get("/api/student/check");
-            var data = await response.Content.ReadAsStringAsync();
+            var action = new StudentContextAction(sessionStorage);
 
-            logged = !string.IsNullOrEmpty(data);
+            logged = action.Check() is not null;
             StateHasChanged();
         }
 

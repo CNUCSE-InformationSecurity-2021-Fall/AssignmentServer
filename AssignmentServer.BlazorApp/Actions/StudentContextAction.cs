@@ -1,46 +1,40 @@
 ﻿using AssignmentServer.BlazorApp.Data;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace AssignmentServer.BlazorApp.Controllers
+namespace AssignmentServer.BlazorApp.Actions
 {
-    [ApiController]
-    [Route("/api/[controller]/[action]")]
-    public class StudentController : ApiController
+    public class StudentContextAction : CommonContextAction
     {
         static readonly Regex StudentIdRegex = new("2[0-9]{8}", RegexOptions.Compiled);
+        static readonly SessionManager sessionManager; 
 
-        SessionManager _sessionManager;
-        HttpContext _httpContext;
-        readonly string _token;
-
-        public StudentController(IHttpContextAccessor hca, SessionManager manager)
-        {
-            _httpContext = hca.HttpContext;
-            _sessionManager = manager;
-
-            _httpContext.Request.Headers.TryGetValue("Authorization", out var token);
-            _token = token.ToString();
+        static StudentContextAction() {
+            sessionManager = new SessionManager();
         }
 
-        public StudentInfo Check()
-        {
-            var result = new StudentInfo(_token);
-
-            return result.Valid ? result : null;
+        public StudentContextAction(ProtectedBrowserStorage context) : base(context) 
+        { 
+            
         }
-        
-        [HttpPost]
-        public StudentInfo Login([FromBody] LoginFormData formData) 
+
+        public StudentInfo Check() 
         {
+            return currentUserInfo;
+        }
+
+        public StudentInfo Login(LoginFormData formData)
+        {
+            if (currentUserInfo is not null)
+                return null;
+
             Match match = StudentIdRegex.Match(formData.StudentId);
 
             // check student id format
@@ -51,10 +45,10 @@ namespace AssignmentServer.BlazorApp.Controllers
             var cabinet = $"Cabinet/Students/{id}/student.json";
 
             // check sanity
-            if (!System.IO.File.Exists(cabinet))
+            if (!File.Exists(cabinet))
                 return null;
 
-            var cabData = System.IO.File.ReadAllText(cabinet, Encoding.UTF8);
+            var cabData = File.ReadAllText(cabinet);
             var result = JsonConvert.DeserializeObject<Student>(cabData);
 
             if (result is null)
@@ -66,28 +60,25 @@ namespace AssignmentServer.BlazorApp.Controllers
                    null;
         }
 
-        [HttpPost]
-        public PasswordChangeResultType UpdatePassword([FromBody]PasswordChangeFormData formData)
+        public PasswordChangeResultType UpdatePassword(PasswordChangeFormData formData)
         {
-            var user = new StudentInfo(_token);
-
-            if (!user.Valid)
+            if (!currentUserInfo.Valid)
             {
                 return PasswordChangeResultType.LoginRevoked;
             }
-            else if (formData.NewPassword != formData.NewPasswordConfirm) 
+            else if (formData.NewPassword != formData.NewPasswordConfirm)
             {
                 return PasswordChangeResultType.ConfirmFailure;
             }
 
-            var cabinet = $"Cabinet/Students/{user.Id}/student.json";
+            var cabinet = $"Cabinet/Students/{currentUserInfo.Id}/student.json";
 
-            if (!System.IO.File.Exists(cabinet))
+            if (!File.Exists(cabinet))
             {
                 return PasswordChangeResultType.UserNotFound;
             }
 
-            var cabData = System.IO.File.ReadAllText(cabinet, Encoding.UTF8);
+            var cabData = File.ReadAllText(cabinet, Encoding.UTF8);
             var result = JsonConvert.DeserializeObject<Student>(cabData);
 
             if (!result.PasswordMatches(formData.Password))

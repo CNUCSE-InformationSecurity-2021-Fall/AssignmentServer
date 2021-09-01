@@ -17,6 +17,7 @@ namespace AssignmentServer.BlazorApp.Data
         public DateTime? LastPasswordSet { get; set; }
 
         public string    Name { get; set; }
+        public int       Grade { get; set; }
 
         private byte[]   MakeHash(byte[] plainText, byte[] salt) 
         {
@@ -31,8 +32,16 @@ namespace AssignmentServer.BlazorApp.Data
 
         public bool      PasswordMatches(string plainText) 
         {
-            return ToPassword(plainText, newSalt: false, updateEntity: false)
-                   == Password;
+            if (Password is not null)
+            {
+                return ToPassword(plainText, newSalt: false, updateEntity: false)
+                       == Password;
+            }
+            else
+            {
+                var NumId = Convert.ToInt32(Id);
+                return plainText == (NumId - Grade).ToString();
+            }
         }
 
         public string    ToPassword(string plainText, bool newSalt, bool updateEntity) 

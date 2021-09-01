@@ -37,36 +37,23 @@
 
     private async Task OnSubmit()
     {
-        var client   = new ApiClient(sessionStorage);
-        var response = await client.Post("/api/student/login", formData);
-        var data     = await response.Content.ReadAsStringAsync();
+        var action = new StudentContextAction(sessionStorage);
+        var result = action.Login(formData);
 
-        if (string.IsNullOrEmpty(data))
+        errorState = null;
+
+        if (result is null || !result.Valid)
         {
             errorState = new()
             {
-                Message = "로그인 실패! 학번이나 비밀번호를 다시 확인해주세요."
+                Message = "로그인 실패! 조교에게 문의하세요!"
             };
+
+            return;
         }
-        else
-        {
-            errorState = null;
 
-            var result = JsonConvert.DeserializeObject<StudentInfo>(data);
-
-            if (result is null || !result.Valid)
-            {
-                errorState = new()
-                {
-                    Message = "로그인 실패! 조교에게 문의하세요!"
-                };
-
-                return;
-            }
-
-            await sessionStorage.SetAsync("token", result.Token);
-            navManager.NavigateTo("/dashboard", true);
-        }
+        await sessionStorage.SetAsync("token", result.Token);
+        navManager.NavigateTo("/dashboard", true);
     }
 
     protected override Task OnInitializedAsync()
