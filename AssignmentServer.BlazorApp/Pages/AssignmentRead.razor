@@ -2,7 +2,7 @@
 @inject ProtectedSessionStorage sessionStorage
 
 <div class="assignment-container">
-    @if (AssignmentLoaded?.Valid == true)
+    @if (LoginStatus && AssignmentLoaded?.Valid == true)
     {
         <p class="small text-primary due-date">과제 제출 마감: @AssignmentLoaded.Due</p>
         <p class="small text-primary due-date">최근 제출 일시: @(AssignmentSubmit.LastSubmitDate?.ToString() ?? "미제출")</p>
@@ -44,6 +44,7 @@
     [Parameter]
     public string Id { get; set; }
 
+    public bool LoginStatus { get; set; }
     public Assignment AssignmentLoaded { get; set; }
     public StudentSubmit AssignmentSubmit { get; set; }
 
@@ -55,6 +56,8 @@
     {
         if (firstRender)
         {
+            LoginStatus = true;
+
             var action = new StudentContextAction(sessionStorage);
             var logged = await action.Check();
 
@@ -77,6 +80,10 @@
                         builder.CloseComponent();
                     };
                 }
+            }
+            else
+            {
+                LoginStatus = false;
             }
 
             StateHasChanged();
