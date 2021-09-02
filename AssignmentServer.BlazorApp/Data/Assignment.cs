@@ -45,6 +45,7 @@ namespace AssignmentServer.BlazorApp.Data
 
         public string Title { get; set; }
         public string Summary { get; set; }
+        public string Application { get; set; }
         
         public DateTime Due { get; set; }
 
