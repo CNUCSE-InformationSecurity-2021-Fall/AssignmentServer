@@ -56,6 +56,15 @@ namespace AssignmentServer.BlazorApp.Data
         public int MaxScore { get; set; }
         public bool Valid { get; set; }
         
+        public bool PptExists
+        {
+            get
+            {
+                var pptFile = $"Cabinet/Assignments/{Id}/review.pdf";
+                return File.Exists(pptFile);
+            }
+        }
+
         public bool VideoExists 
         {
             get

@@ -22,5 +22,19 @@ namespace AssignmentServer.BlazorApp.Controllers
             var stream = System.IO.File.OpenRead(videoPath);
             return File(stream, "video/mp4");
         }
+
+        public IActionResult PptReview(string Id)
+        {
+            if (string.IsNullOrEmpty(Id))
+                return StatusCode(404);
+
+            var pptPath = $"Cabinet/Assignments/{Id}/review.pdf";
+
+            if (!System.IO.File.Exists(pptPath))
+                return StatusCode(404);
+
+            var stream = System.IO.File.OpenRead(pptPath);
+            return File(stream, "application/pdf");
+        }
     }
 }
