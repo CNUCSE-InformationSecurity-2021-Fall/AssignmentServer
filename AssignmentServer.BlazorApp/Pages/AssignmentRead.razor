@@ -16,20 +16,20 @@
                 <video controls>
                     <source src="@("/api/Content/VideoReview/" + AssignmentLoaded.Id)" />
                 </video>
-                <p>
-                    <span class="oi oi-video"></span>
-                    <a href="@("/api/Content/VideoReview/" + AssignmentLoaded.Id)">영상 다운로드</a>
-                </p>
+            </div>
+            <div class="assignment-file-container">
+                <span class="oi oi-video"></span>
+                <a href="@("/api/Content/VideoReview/" + AssignmentLoaded.Id)">영상 다운로드</a>
             </div>
         }
 
         @if (AssignmentLoaded.PptExists)
-         {
+        {
             <div class="assignment-file-container">
                 <span class="oi oi-file"></span>
                 <a href="@("/api/Content/PptReview/" + AssignmentLoaded.Id)">PPT 다운로드</a>
             </div>
-         }
+        }
 
         <div class="assignment-detail-container">
             <h4>실습 상세</h4>

@@ -20,6 +20,14 @@ h3 {
         width: 400px;
     }
 
+.assignment-file-container {
+    margin: 15px !important;
+}
+
+.assignment-file-container a {
+    text-decoration: none;
+}
+
 .assignment-detail-container {
     margin-bottom: 15px;
 }
