@@ -2,7 +2,7 @@
 @inject NavigationManager       navManager
 
 <div class="top-row navbar navbar-dark">
-    <a class="w-100 navbar-brand text-center" href="">2021 정보보호</a>
+    <a class="w-100 navbar-brand text-center" href="">@(Info?.Name ?? "2021 정보보호")</a>
 </div>
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
@@ -73,6 +73,8 @@
     private bool logged = false;
     private bool collapseNavMenu = true;
     private DateTime timestamp = DateTime.Now;
+
+    private StudentInfo Info;
     private List<StudentSubmit> assignments;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -93,13 +95,13 @@
         if (firstRender)
         {
             var action = new StudentContextAction(sessionStorage);
-            var info = await action.Check();
+            Info = await action.Check();
 
-            logged = info?.Valid == true;
+            logged = Info?.Valid == true;
 
             if (logged)
             {
-                assignments = info.AssignmentStatus;
+                assignments = Info.AssignmentStatus;
             }
 
             StateHasChanged();
