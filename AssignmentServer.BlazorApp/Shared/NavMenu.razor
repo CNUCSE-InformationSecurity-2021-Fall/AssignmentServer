@@ -84,7 +84,7 @@
 
     private async Task DoLogout()
     {
-        await sessionStorage.DeleteAsync("token");
+        await sessionStorage.DeleteAsync("Authorization");
         navManager.NavigateTo("/", true);
     }
 
