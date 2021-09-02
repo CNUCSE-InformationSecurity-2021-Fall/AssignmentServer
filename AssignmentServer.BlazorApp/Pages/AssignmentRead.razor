@@ -4,7 +4,8 @@
 <div class="assignment-container">
     @if (AssignmentLoaded?.Valid == true)
     {
-        <p class="small text-primary due-date">과제 제출 마감:  @AssignmentLoaded.Due</p>
+        <p class="small text-primary due-date">과제 제출 마감: @AssignmentLoaded.Due</p>
+        <p class="small text-primary due-date">최근 제출 일시: @(AssignmentSubmit.LastSubmitDate?.ToString() ?? "미제출")</p>
         <h3>@AssignmentLoaded.Title</h3>
 
 
@@ -44,6 +45,8 @@
     public string Id { get; set; }
 
     public Assignment AssignmentLoaded { get; set; }
+    public StudentSubmit AssignmentSubmit { get; set; }
+
     public bool Error { get; set; }
 
     public RenderFragment Application;
@@ -53,11 +56,14 @@
         if (firstRender)
         {
             var action = new StudentContextAction(sessionStorage);
-            var logged = await action.Check() is not null;
+            var logged = await action.Check();
 
-            if (logged)
+            if (logged is not null && logged.Valid)
             {
                 AssignmentLoaded = new Assignment(Id);
+                AssignmentSubmit = logged.AssignmentStatus
+                                         .Where(assignment => assignment.Id == AssignmentLoaded.Id)
+                                         .FirstOrDefault();
 
                 if (AssignmentLoaded.Application is not null)
                 {

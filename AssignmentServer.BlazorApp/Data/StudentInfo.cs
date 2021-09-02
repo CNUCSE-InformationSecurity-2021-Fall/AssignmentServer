@@ -66,14 +66,14 @@ namespace AssignmentServer.BlazorApp.Data
         public string Name  { get; set; }
         public string Token { get; set; }
 
-        public List<AssignmentNavViewData> AssignmentStatus
+        public List<StudentSubmit> AssignmentStatus
         {
             get
             {
                 if (!Valid)
                     return null;
 
-                var result = new List<AssignmentNavViewData>();
+                var result = new List<StudentSubmit>();
                 var directories = Directory.GetDirectories("Cabinet/Assignments");
 
                 foreach (var directory in directories) 
@@ -83,7 +83,7 @@ namespace AssignmentServer.BlazorApp.Data
                     if (files.Where(file => file.EndsWith("meta.json")).Any())
                     {
                         var file = File.ReadAllText(directory + "/meta.json");
-                        var assignment = JsonConvert.DeserializeObject<AssignmentNavViewData>(file);
+                        var assignment = JsonConvert.DeserializeObject<StudentSubmit>(file);
 
                         if (assignment is null || !assignment.Visible)
                             continue;
@@ -93,10 +93,11 @@ namespace AssignmentServer.BlazorApp.Data
                         if (File.Exists(submitPath))
                         {
                             var submitData = File.ReadAllText(submitPath);
-                            var submit = JsonConvert.DeserializeObject<StudentSubmit>(submitData);
+                            var submit = JsonConvert.DeserializeObject<StudentSubmitRaw>(submitData);
 
                             assignment.Submitted = submit.Timestamp.Any();
                             assignment.LastSubmitDate = submit.Timestamp.LastOrDefault();
+                            assignment.TotalSubmitCount = submit.Timestamp.Count();
                         }
                         else
                         {
