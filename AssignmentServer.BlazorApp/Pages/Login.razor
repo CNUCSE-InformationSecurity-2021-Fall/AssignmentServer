@@ -42,17 +42,17 @@
 
         errorState = null;
 
-        if (result is null || !result.Valid)
+        if (result.ResultType != LoginResultType.Success)
         {
             errorState = new()
             {
-                Message = "로그인 실패! 조교에게 문의하세요!"
+                Message = "로그인 실패! 조교에게 문의하세요!: " + result.ResultType.ToString()
             };
 
             return;
         }
 
-        await sessionStorage.SetAsync("Authorization", result.Token);
+        await sessionStorage.SetAsync("Authorization", result.Student.Token);
         navManager.NavigateTo("/dashboard", true);
     }
 

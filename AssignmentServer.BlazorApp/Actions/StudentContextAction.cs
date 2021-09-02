@@ -37,36 +37,54 @@ namespace AssignmentServer.BlazorApp.Actions
             return null;
         }
 
-        public async Task<StudentInfo> Login(LoginFormData formData)
+        public async Task<LoginResult> Login(LoginFormData formData)
         {
-            if (await Check() is not null)
-                return null;
+            var result = new LoginResult();
+            var loginStatus = await Check();
+
+            if (loginStatus.Valid)
+            {
+                result.ResultType = LoginResultType.AlreadyLogged;
+                return result;
+            }
 
             Match match = StudentIdRegex.Match(formData.StudentId);
 
             // check student id format
             if (!match.Success)
-                return null;
+            {
+                result.ResultType = LoginResultType.InvalidStudentId;
+                return result;
+            }
 
             var id = match.Value;
             var cabinet = $"Cabinet/Students/{id}/student.json";
 
             // check sanity
             if (!File.Exists(cabinet))
-                return null;
+            {
+                result.ResultType = LoginResultType.StudentNotExists;
+                return result;
+            }
 
             var cabData = File.ReadAllText(cabinet);
-            var result = JsonConvert.DeserializeObject<Student>(cabData);
+            var student = JsonConvert.DeserializeObject<Student>(cabData);
 
-            Console.WriteLine("Debug Here {0} {1}", formData.StudentId, formData.Password);
+            if (student is null)
+            {
+                result.ResultType = LoginResultType.BrokenStudent;
+            }
+            else if (!student.PasswordMatches(formData.Password))
+            {
+                result.ResultType = LoginResultType.PasswordNotMatch;
+            }
+            else
+            {
+                result.ResultType = LoginResultType.Success;
+                result.Student = new StudentInfo(student);
+            }
 
-            if (result is null)
-                return null;
-
-            // check password
-            return result.PasswordMatches(formData.Password) ?
-                   new StudentInfo(result) :
-                   null;
+            return result;
         }
 
         public async Task<PasswordChangeResultType> UpdatePassword(PasswordChangeFormData formData)
