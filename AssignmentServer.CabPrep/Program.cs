@@ -32,6 +32,7 @@ namespace AssignmentServer.CabPrep
                     Directory.Delete(cabDir, true);
 
                 Directory.CreateDirectory(cabDir);
+                Directory.CreateDirectory($"{cabDir}/Assignments");
                 
                 var content = JsonConvert.SerializeObject(student);
                 File.WriteAllText(stdPath, content, Encoding.UTF8);
