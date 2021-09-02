@@ -18,7 +18,7 @@ namespace AssignmentServer.BlazorApp.Data
 
             var configFile = $"Cabinet/Assignments/{Id}/meta.json";
             
-            if (File.Exists(configFile))
+            if (!File.Exists(configFile))
             {
                 Valid = false;
                 return;
@@ -53,6 +53,15 @@ namespace AssignmentServer.BlazorApp.Data
 
         public int MaxScore { get; set; }
         public bool Valid { get; set; }
+        
+        public bool VideoExists 
+        {
+            get
+            {
+                var videoFile = $"Cabinet/Assignments/{Id}/review.mp4";
+                return File.Exists(videoFile);
+            }
+        }
 
         public string Detail
         {

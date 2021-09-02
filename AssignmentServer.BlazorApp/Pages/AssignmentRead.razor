@@ -1,0 +1,40 @@
+﻿@page "/assignment/{id}"
+
+@if (AssignmentLoaded.Valid)
+{
+    <h3>@AssignmentLoaded.Title</h3>
+
+    @if (AssignmentLoaded.VideoExists)
+    {
+        <div class="assignment-video-container">
+            <h4>실습 영상 다시보기</h4>
+            <video controls>
+                <source src="@("/api/Content/VideoReview/" + AssignmentLoaded.Id)" />
+            </video>
+        </div>
+    }
+
+    <div class="assignment-detail-container">
+        @((MarkupString) AssignmentLoaded.Detail)
+    </div>
+}
+else
+{
+    <h2>기다려도 안 나오나요?</h2>
+    <h2>여긴 아무것도 없어요! 돌아가!</h2>
+}
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    public Assignment AssignmentLoaded { get; set; }
+    public bool Error { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AssignmentLoaded = new Assignment(Id);
+        await base.OnInitializedAsync();
+    }
+}
