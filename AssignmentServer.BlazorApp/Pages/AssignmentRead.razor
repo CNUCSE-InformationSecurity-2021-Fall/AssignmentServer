@@ -1,28 +1,42 @@
 ﻿@page "/assignment/{id}"
+@inject ProtectedSessionStorage sessionStorage
 
-@if (AssignmentLoaded.Valid)
-{
-    <h3>@AssignmentLoaded.Title</h3>
-
-    @if (AssignmentLoaded.VideoExists)
+<div class="assignment-container">
+    @if (AssignmentLoaded?.Valid == true)
     {
-        <div class="assignment-video-container">
-            <h4>실습 영상 다시보기</h4>
-            <video controls>
-                <source src="@("/api/Content/VideoReview/" + AssignmentLoaded.Id)" />
-            </video>
-        </div>
-    }
+        <p class="small text-primary due-date">과제 제출 마감:  @AssignmentLoaded.Due</p>
+        <h3>@AssignmentLoaded.Title</h3>
 
-    <div class="assignment-detail-container">
-        @((MarkupString) AssignmentLoaded.Detail)
-    </div>
-}
-else
-{
-    <h2>기다려도 안 나오나요?</h2>
-    <h2>여긴 아무것도 없어요! 돌아가!</h2>
-}
+
+        @if (AssignmentLoaded.VideoExists)
+        {
+            <div class="assignment-video-container">
+                <h4>실습 영상 다시보기</h4>
+                <video controls>
+                    <source src="@("/api/Content/VideoReview/" + AssignmentLoaded.Id)" />
+                </video>
+                <p>깝깝하신가요? <a href="@("/api/Content/VideoReview/" + AssignmentLoaded.Id)">다운로드</a></p>
+            </div>
+        }
+
+        <div class="assignment-detail-container">
+            <h4>실습 상세</h4>
+            @((MarkupString) AssignmentLoaded.Detail)
+        </div>
+
+        <h4>과제 제출</h4>
+
+        @if (Application is not null)
+        {
+            @Application
+        }
+    }
+    else
+    {
+        <h2>기다려도 안 나오나요?</h2>
+        <h2>여긴 아무것도 없어요! 돌아가!</h2>
+    }
+</div>
 
 
 @code {
@@ -32,9 +46,36 @@ else
     public Assignment AssignmentLoaded { get; set; }
     public bool Error { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    public RenderFragment Application;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        AssignmentLoaded = new Assignment(Id);
+        if (firstRender)
+        {
+            var action = new StudentContextAction(sessionStorage);
+            var logged = await action.Check() is not null;
+
+            if (logged)
+            {
+                AssignmentLoaded = new Assignment(Id);
+
+                if (AssignmentLoaded.Application is not null)
+                {
+                    var typeName = "AssignmentServer.BlazorApp.Pages." + AssignmentLoaded.Application;
+                    var apptype = Type.GetType(typeName);
+
+                    Application = builder =>
+                    {
+                        builder.OpenComponent(0, apptype);
+                        builder.AddAttribute(1, "AssignmentId", AssignmentLoaded.Id);
+                        builder.CloseComponent();
+                    };
+                }
+            }
+
+            StateHasChanged();
+        }
+
         await base.OnInitializedAsync();
     }
 }

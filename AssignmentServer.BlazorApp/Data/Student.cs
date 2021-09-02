@@ -18,6 +18,17 @@ namespace AssignmentServer.BlazorApp.Data
 
         public string    Name { get; set; }
         public int       Grade { get; set; }
+        public bool      PasswordChanged 
+        {
+            get
+            {
+                var NumId = Convert.ToInt32(Id);
+                var InitialPassword = (NumId - Grade).ToString();
+
+                return LastPasswordSet is not null &&
+                       !PasswordMatches(InitialPassword);
+            }
+        }
 
         private byte[]   MakeHash(byte[] plainText, byte[] salt) 
         {

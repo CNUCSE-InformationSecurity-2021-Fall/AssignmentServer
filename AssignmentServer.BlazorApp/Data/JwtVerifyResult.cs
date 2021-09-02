@@ -10,5 +10,6 @@ namespace AssignmentServer.BlazorApp.Data
         public long exp { get; set; }
         public string studentId { get; set; }
         public string name { get; set; }
+        public bool passwordChanged { get; set; }
     }
 }

@@ -20,7 +20,7 @@ namespace AssignmentServer.BlazorApp.Controllers
                 return StatusCode(404);
 
             var stream = System.IO.File.OpenRead(videoPath);
-            return new FileStreamResult(stream, "video/mp4");
+            return File(stream, "video/mp4");
         }
     }
 }

@@ -1,0 +1,25 @@
+﻿.due-date {
+    margin-bottom: 5px !important;
+}
+
+h3 {
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
+}
+
+.assignment-container h4 {
+    margin: 30px 0 !important;
+}
+
+.assignment-video-container {
+    margin-bottom: 15px;
+}
+
+    .assignment-video-container video {
+        height: 250px;
+        width: 400px;
+    }
+
+.assignment-detail-container {
+    margin-bottom: 15px;
+}

@@ -8,9 +8,7 @@ namespace AssignmentServer.BlazorApp.Data
     public class StudentSubmit
     {
         public string AssignmentId { get; set; }
-        public DateTime Timestamp { get; set; }
-        public string Text { get; set; }
-        public string File { get; set; }
+        public DateTime[] Timestamp { get; set; }
         public int Score { get; set; }
     }
 }

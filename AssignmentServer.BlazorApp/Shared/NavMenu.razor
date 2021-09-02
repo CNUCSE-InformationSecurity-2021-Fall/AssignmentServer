@@ -73,7 +73,7 @@
     private bool logged = false;
     private bool collapseNavMenu = true;
     private DateTime timestamp = DateTime.Now;
-    private Assignment[] assignments = new Assignment[0];
+    private List<AssignmentNavViewData> assignments;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
@@ -93,8 +93,15 @@
         if (firstRender)
         {
             var action = new StudentContextAction(sessionStorage);
+            var info = await action.Check();
 
-            logged = await action.Check() is not null;
+            logged = info?.Valid == true;
+
+            if (logged)
+            {
+                assignments = info.AssignmentStatus;
+            }
+
             StateHasChanged();
         }
 

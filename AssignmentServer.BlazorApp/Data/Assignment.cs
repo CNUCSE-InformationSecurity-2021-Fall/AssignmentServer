@@ -38,6 +38,7 @@ namespace AssignmentServer.BlazorApp.Data
             Due = des.Due;
             Visible = des.Visible;
             MaxScore = des.MaxScore;
+            Application = des.Application;
             Valid = true;
         }
 

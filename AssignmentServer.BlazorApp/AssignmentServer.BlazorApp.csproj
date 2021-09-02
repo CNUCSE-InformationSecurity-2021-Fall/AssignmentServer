@@ -18,4 +18,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Cabinet\Assignments\week1\detail.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Cabinet\Students\201704150\Assignments\" />
+  </ItemGroup>
+
 </Project>
