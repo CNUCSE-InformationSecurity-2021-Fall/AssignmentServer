@@ -42,7 +42,7 @@ namespace AssignmentServer.BlazorApp.Actions
             var result = new LoginResult();
             var loginStatus = await Check();
 
-            if (loginStatus.Valid)
+            if (loginStatus is not null && loginStatus.Valid)
             {
                 result.ResultType = LoginResultType.AlreadyLogged;
                 return result;
