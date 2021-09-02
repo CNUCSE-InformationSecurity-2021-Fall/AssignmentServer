@@ -62,7 +62,7 @@ namespace AssignmentServer.BlazorApp
                 endpoints.MapBlazorHub();
                 endpoints.MapControllerRoute(
                     name: "api",
-                    pattern: "/{controller}/{action}/{Id?}");
+                    pattern: "/api/{controller}/{action}/{Id?}");
 
                 endpoints.MapFallbackToPage("/_Host");
             });
