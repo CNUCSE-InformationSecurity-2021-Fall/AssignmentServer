@@ -58,6 +58,8 @@ namespace AssignmentServer.BlazorApp.Actions
             var cabData = File.ReadAllText(cabinet);
             var result = JsonConvert.DeserializeObject<Student>(cabData);
 
+            Console.WriteLine("Debug Here {0} {1}", formData.StudentId, formData.Password);
+
             if (result is null)
                 return null;
 
