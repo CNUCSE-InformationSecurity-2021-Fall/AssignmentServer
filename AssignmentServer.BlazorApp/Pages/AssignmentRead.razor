@@ -38,8 +38,12 @@
 
         <h4>과제 제출</h4>
 
-        @if (Application is not null)
+        @if (Application is null)
         {
+            <div class="alert-info">과제 제출 대기중입니다. 오픈될 때 까지 기다려주세요!</div>
+        }
+        else 
+        { 
             @Application
         }
     }
@@ -79,7 +83,7 @@
                                          .Where(assignment => assignment.Id == AssignmentLoaded.Id)
                                          .FirstOrDefault();
 
-                if (AssignmentLoaded.Application is not null)
+                if (!string.IsNullOrEmpty(AssignmentLoaded.Application))
                 {
                     var typeName = "AssignmentServer.BlazorApp.Pages." + AssignmentLoaded.Application;
                     var apptype = Type.GetType(typeName);
