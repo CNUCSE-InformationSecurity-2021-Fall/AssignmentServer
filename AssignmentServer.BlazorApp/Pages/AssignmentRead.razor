@@ -67,42 +67,51 @@
 
     public RenderFragment Application;
 
+    private async Task LoadAssignmentEntity()
+    {
+        LoginStatus = true;
+
+        var action = new StudentContextAction(sessionStorage);
+        var logged = await action.Check();
+
+        if (logged is not null && logged.Valid)
+        {
+            AssignmentLoaded = new Assignment(Id);
+            AssignmentSubmit = logged.AssignmentStatus
+                                     .Where(assignment => assignment.Id == AssignmentLoaded.Id)
+                                     .FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(AssignmentLoaded.Application))
+            {
+                var typeName = "AssignmentServer.BlazorApp.Pages." + AssignmentLoaded.Application;
+                var apptype = Type.GetType(typeName);
+
+                Application = builder =>
+                {
+                    builder.OpenComponent(0, apptype);
+                    builder.AddAttribute(1, "AssignmentId", AssignmentLoaded.Id);
+                    builder.CloseComponent();
+                };
+            }
+        }
+        else
+        {
+            LoginStatus = false;
+        }
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAssignmentEntity();
+        await base.OnParametersSetAsync();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        {
-            LoginStatus = true;
-
-            var action = new StudentContextAction(sessionStorage);
-            var logged = await action.Check();
-
-            if (logged is not null && logged.Valid)
-            {
-                AssignmentLoaded = new Assignment(Id);
-                AssignmentSubmit = logged.AssignmentStatus
-                                         .Where(assignment => assignment.Id == AssignmentLoaded.Id)
-                                         .FirstOrDefault();
-
-                if (!string.IsNullOrEmpty(AssignmentLoaded.Application))
-                {
-                    var typeName = "AssignmentServer.BlazorApp.Pages." + AssignmentLoaded.Application;
-                    var apptype = Type.GetType(typeName);
-
-                    Application = builder =>
-                    {
-                        builder.OpenComponent(0, apptype);
-                        builder.AddAttribute(1, "AssignmentId", AssignmentLoaded.Id);
-                        builder.CloseComponent();
-                    };
-                }
-            }
-            else
-            {
-                LoginStatus = false;
-            }
-
-            StateHasChanged();
-        }
+            LoadAssignmentEntity();
 
         await base.OnInitializedAsync();
     }
