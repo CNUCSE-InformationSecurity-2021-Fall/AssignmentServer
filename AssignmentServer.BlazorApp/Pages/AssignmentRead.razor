@@ -85,7 +85,7 @@
 
             if (!string.IsNullOrEmpty(AssignmentLoaded.Application))
             {
-                var typeName = "AssignmentServer.BlazorApp.Pages." + AssignmentLoaded.Application;
+                var typeName = "AssignmentServer.BlazorApp.Pages.Applications." + AssignmentLoaded.Application;
                 var apptype = Type.GetType(typeName);
 
                 Application = builder =>
