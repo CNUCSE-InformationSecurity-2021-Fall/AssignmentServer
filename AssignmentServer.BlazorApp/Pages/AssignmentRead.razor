@@ -67,6 +67,8 @@
 
     public RenderFragment Application;
 
+    public bool ParameterUpdated = false;
+
     private async Task LoadAssignmentEntity()
     {
         LoginStatus = true;
@@ -102,16 +104,24 @@
         StateHasChanged();
     }
 
+    protected override bool ShouldRender()
+    {
+        return ParameterUpdated || base.ShouldRender();
+    }
+
     protected override async Task OnParametersSetAsync()
     {
-        await LoadAssignmentEntity();
+        ParameterUpdated = true;
         await base.OnParametersSetAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-            LoadAssignmentEntity();
+        if (firstRender || ShouldRender())
+        {
+            await LoadAssignmentEntity();
+            ParameterUpdated = false;
+        }
 
         await base.OnInitializedAsync();
     }
