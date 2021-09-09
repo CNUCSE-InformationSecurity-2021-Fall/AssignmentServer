@@ -1,0 +1,61 @@
+﻿.codetester-io-row {
+    width: 100%;
+    height: auto;
+    display: flex;
+}
+
+.codetester-io-row > div {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.codetester-io-row > div:nth-child(1) {
+    margin-right: 10px;
+}
+
+.codetester-io-row > div:nth-child(2) {
+    margin-left: 10px;
+}
+
+.codetester-io-row .example {
+    border: 1px solid #d3d6d8;
+    border-radius: 5px;
+    padding: 25px;
+    background: #e2e3e5;
+    font-family: Consolas, "Lucida Console", Fixedsys;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.compiler-setup .compiler-setup-row {
+    display: flex;
+    align-items: center;
+}
+
+.compiler-setup .compiler-setup-row p {
+    min-width: 100px;
+    font-weight: bold;
+    padding-right: 30px;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.compiler-setup .compiler-setup-row p:not(:first-child) {
+    padding-left: 30px;
+}
+
+.compiler-setup .compiler-setup-row select {
+    width: 250px;
+}
+
+.editor-actions {
+    text-align: right;
+}
+
+.editor-container {
+    width: 100%;
+    height: 400px;
+}

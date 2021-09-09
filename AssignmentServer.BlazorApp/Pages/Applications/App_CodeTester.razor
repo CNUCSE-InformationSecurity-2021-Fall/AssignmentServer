@@ -1,0 +1,123 @@
+﻿@inherits App_AuthBase
+
+@inject ProtectedLocalStorage   localStorage
+@inject ProtectedSessionStorage sessionStorage
+@inject IJSRuntime JSRuntime
+
+<div class="codetester-example-io">
+    <div class="codetester-io-row">
+        <div>
+            <h5>입력 예시</h5>
+            <samp class="example">
+            <pre>@testInfo?.InputExample</pre>
+            </samp>
+        </div>
+        <div>
+            <h5>출력 예시</h5>
+            <samp class="example">
+                <pre>@testInfo?.OutputExample</pre>
+            </samp>
+        </div>
+    </div>
+    <p>* 입출력 예시는 코드가 정상적으로 작성되었는지 확인하기 위하여 제공됩니다. 일부 Edge Case에 대해 오답이 발생할 수 있습니다!</p>
+</div>
+
+<form class="codetester-editor my-3" method="post">
+    <h5>코드 편집기</h5>
+    <div class="compiler-setup my-3">
+        <div class="mb-3 compiler-setup-row">
+            <p class="form-label">언어</p>
+            <select name="language" class="form-control" @onchange="UpdateEditorLanguage"
+                    value="@EditorLanguage">
+                <option value="c">C</option>
+                <option value="cpp">C++</option>
+                <option value="csharp">C#</option>
+                <option value="java">Java</option>
+                <option value="javascript">Javascript</option>
+                <option value="rust">Rust</option>
+                <option value="python">Python</option>
+            </select>
+
+            <p class="form-label">에디터 테마</p>
+            <select class="form-control" @onchange="UpdateEditorTheme"
+                    value="@EditorTheme">
+                <option value="vs">화이트</option>
+                <option value="vs-dark">다크</option>
+            </select>
+        </div>
+        <div class="compiler-setup-row">
+            <div class="alert alert-secondary w-100">
+                라이브러리, 컴파일러 옵션 변경이 허가되지 않은 과제입니다.
+            </div>
+        </div>
+    </div>
+    <div class="editor-container my-3">
+
+    </div>
+    <div class="editor-actions w-100">
+        <button class="btn btn-secondary" id="ctSave">임시저장 (Ctrl+S)</button>
+        <button class="btn btn-primary" id="ctExecute">테스트 (Ctrl+E)</button>
+        <button class="btn btn-primary" id="ctSubmit">제출 (Ctrl+U)</button>
+    </div>
+</form>
+
+<div class="codetester-result">
+    <div class="execution-result">
+        @executionResult
+    </div>
+    <div class="assessment-result">
+        <div class="alert alert-primary">
+            아직 제출되지 않았습니다. 코드를 제출해주세요!
+        </div>
+    </div>
+</div>
+
+@code {
+    private object editor;
+    private CodeTesterContextAction contextAction;
+
+    private string EditorLanguage;
+    private string EditorTheme;
+
+    private CodeTestInfo  testInfo;
+    private string executionResult;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            contextAction = new CodeTesterContextAction(AssignmentId, CurrentStudent);
+
+            var language = await localStorage.GetAsync<string>("editor-language");
+            var theme = await localStorage.GetAsync<string>("editor-theme");
+
+            EditorLanguage = language.Value ?? "c";
+            EditorTheme = theme.Value ?? "vs";
+
+            await JSRuntime.InvokeAsync<object>("InitializeEditor",
+                EditorTheme, EditorLanguage 
+            );
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateEditorLanguage(ChangeEventArgs e)
+    {
+        EditorLanguage = e.Value as string;
+
+        await localStorage.SetAsync("editor-language", EditorLanguage);
+        await JSRuntime.InvokeVoidAsync("UpdateEditorLanguage", EditorLanguage);
+    }
+
+    private async Task UpdateEditorTheme(ChangeEventArgs e)
+    {
+        EditorTheme = e.Value as string;
+
+        await localStorage.SetAsync("editor-theme", EditorTheme);
+        await JSRuntime.InvokeVoidAsync("UpdateEditorTheme", EditorTheme);
+    }
+
+}
