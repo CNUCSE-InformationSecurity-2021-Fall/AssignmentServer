@@ -16,18 +16,25 @@
 
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
+    <link href="~/lib/monaco-editor/min/vs/editor/editor.main.css" />
     <link href="AssignmentServer.BlazorApp.styles.css" rel="stylesheet" />
-
-    <script src="~/lib/axios/dist/axios.min.js"></script>
 </head>
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
 
     <div id="blazor-error-ui">
-        <span class="oi oi-warning"></span> 
+        <span class="oi oi-warning"></span>
         <span class="mx-2">조교가 시스템을 이상하게 만든 탓에 클라이언트가 뻗었읍니다. 미안하지만 새로고침 해주셔요. 계속 이러면 얼른 연락 주시구요.</span>
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+
+    <script src="~/prepare.js"></script>
+
+    <script src="~/lib/monaco-editor/min/vs/loader.js"></script>
+    <script src="~/lib/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+    <script src="~/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
+
+    <script src="~/code-editor.js"></script>
 </body>
 </html>
