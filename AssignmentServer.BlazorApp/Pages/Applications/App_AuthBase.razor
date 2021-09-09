@@ -1,0 +1,28 @@
+﻿@inject ProtectedSessionStorage sessionStorage
+@inject NavigationManager navigationManager
+
+
+
+@code {
+    [Parameter]
+    public string AssignmentId { get; set; }
+
+    public StudentInfo CurrentStudent;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var action = new StudentContextAction(sessionStorage);
+            var student = await action.Check();
+
+            if (student is null)
+                navigationManager.ToBaseRelativePath("/login");
+
+            CurrentStudent = student;
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}
