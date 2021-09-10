@@ -109,11 +109,17 @@
         {
             if (report.Type == CodeTesterReportType.OutputReceived)
             {
-                executionResult += report.Output;
+                lock (executionResult)
+                {
+                    executionResult += report.Output;
+                }
             }
             else if (report.Type == CodeTesterReportType.ExitReport)
             {
-                executionResult += $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
+                lock (executionResult)
+                {
+                    executionResult += $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
+                }
 
                 IsTesting = false;
             }
