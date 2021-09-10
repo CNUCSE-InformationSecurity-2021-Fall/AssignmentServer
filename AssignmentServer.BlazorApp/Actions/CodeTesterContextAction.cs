@@ -121,9 +121,12 @@ namespace AssignmentServer.BlazorApp.Actions
                     FileName = "/usr/bin/docker",
                     Arguments = $"rm {instanceId}"
                 });
+
+                process.CancelOutputRead();
             };
 
             process.Start();
+            process.BeginOutputReadLine();
 
             process.StandardInput.WriteLine();
             process.StandardInput.Close();
