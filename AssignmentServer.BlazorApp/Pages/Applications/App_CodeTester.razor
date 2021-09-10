@@ -28,7 +28,7 @@
         <div class="mb-3 compiler-setup-row">
             <p class="form-label">언어</p>
             <select name="language" class="form-control" @onchange="UpdateEditorLanguage"
-                    value="@EditorLanguage" @bind="EditorLanguage">
+                    value="@EditorLanguage">
                 <option value="c">C</option>
                 <option value="cpp">C++</option>
                 <option value="csharp">C#</option>
@@ -55,6 +55,7 @@
 
     </div>
 </form>
+
 <div class="editor-actions w-100 mb-3">
     <button class="btn btn-secondary" id="ctSave" @onclick="SaveCodeTemp">임시저장 (Ctrl+S)</button>
     <button class="btn btn-primary" id="ctExecute" @onclick="DoTest">테스트 (Ctrl+E)</button>
