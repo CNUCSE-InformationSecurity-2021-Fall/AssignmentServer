@@ -104,6 +104,8 @@
         IsTesting = true;
 
         executionResult = "";
+        StateHasChanged();
+
         var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
 
         contextAction.ExecuteCode(EditorLanguage, currentCode, report =>
@@ -113,6 +115,7 @@
                 lock (executionResult)
                 {
                     executionResult += report.Output;
+                    StateHasChanged();
                 }
             }
             else if (report.Type == CodeTesterReportType.ExitReport)
@@ -120,6 +123,7 @@
                 lock (executionResult)
                 {
                     executionResult += $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
+                    StateHasChanged();
                 }
 
                 IsTesting = false;
