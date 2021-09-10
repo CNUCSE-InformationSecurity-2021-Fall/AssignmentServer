@@ -74,7 +74,7 @@ namespace AssignmentServer.BlazorApp.Actions
             process.StartInfo = new ProcessStartInfo()
             {
                 CreateNoWindow = true,
-                UseShellExecute = true,
+                UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 Arguments = $"-it --memory={memoryLimit}m code-runner-{language}",
