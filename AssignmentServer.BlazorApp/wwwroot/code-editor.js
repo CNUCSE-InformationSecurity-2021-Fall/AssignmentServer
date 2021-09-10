@@ -1,4 +1,4 @@
-﻿function InitializeEditor(theme, language) {
+﻿function InitializeEditor(theme, language, tempsave) {
     const container = document.querySelector(".editor-container");
 
     if (!container) {
@@ -13,6 +13,9 @@
         theme: theme,
         language: language
     });
+
+    if (tempsave)
+        window.editor.setValue(tempsave);
 
     container.addEventListener("keydown", function (e) {
         if (e.ctrlKey) {
@@ -43,6 +46,6 @@ function UpdateEditorTheme(theme) {
     editor.updateOptions({ theme: theme });
 }
 
-function FinalizeUpdate() {
-
+function GetCurrentCode() {
+    return editor.getValue();
 }

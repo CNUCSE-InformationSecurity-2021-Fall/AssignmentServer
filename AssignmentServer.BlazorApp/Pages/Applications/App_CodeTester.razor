@@ -28,7 +28,7 @@
         <div class="mb-3 compiler-setup-row">
             <p class="form-label">언어</p>
             <select name="language" class="form-control" @onchange="UpdateEditorLanguage"
-                    value="@EditorLanguage">
+                    value="@EditorLanguage" @bind="EditorLanguage">
                 <option value="c">C</option>
                 <option value="cpp">C++</option>
                 <option value="csharp">C#</option>
@@ -55,9 +55,9 @@
 
     </div>
     <div class="editor-actions w-100">
-        <button class="btn btn-secondary" id="ctSave">임시저장 (Ctrl+S)</button>
-        <button class="btn btn-primary" id="ctExecute">테스트 (Ctrl+E)</button>
-        <button class="btn btn-primary" id="ctSubmit">제출 (Ctrl+U)</button>
+        <button class="btn btn-secondary" id="ctSave" @onclick="SaveCodeTemp">임시저장 (Ctrl+S)</button>
+        <button class="btn btn-primary" id="ctExecute" @onclick="DoTest">테스트 (Ctrl+E)</button>
+        <button class="btn btn-primary" id="ctSubmit" @onclick="SubmitCode">제출 (Ctrl+U)</button>
     </div>
 </form>
 
@@ -82,6 +82,49 @@
     private CodeTestInfo  testInfo;
     private string executionResult;
 
+    private bool IsTesting;
+
+    private async Task SaveCodeTemp()
+    {
+        var currentCode = JSRuntime.InvokeAsync<string>("GetCurrentCode");
+
+        await localStorage.SetAsync($"editor-tempcode-{AssignmentId}", currentCode);
+        await JSRuntime.InvokeVoidAsync("alert", "임시저장이 완료되었습니다!");
+    }
+
+    private async Task DoTest()
+    {
+        if (IsTesting)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "테스트가 실행중입니다...");
+            return;
+        }
+
+        IsTesting = true;
+
+        executionResult = "";
+        var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
+
+        contextAction.ExecuteCode(EditorLanguage, currentCode, report =>
+        {
+            if (report.Type == CodeTesterReportType.OutputReceived)
+            {
+                executionResult += report.Output;
+            }
+            else if (report.Type == CodeTesterReportType.ExitReport)
+            {
+                executionResult += $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
+
+                IsTesting = false;
+            }
+        });
+    }
+
+    private void SubmitCode()
+    {
+
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await base.OnAfterRenderAsync(firstRender);
@@ -93,12 +136,13 @@
 
             var language = await localStorage.GetAsync<string>("editor-language");
             var theme = await localStorage.GetAsync<string>("editor-theme");
+            var tempsave = await localStorage.GetAsync<string>($"editor-tempsave-{AssignmentId}");
 
             EditorLanguage = language.Value ?? "c";
             EditorTheme = theme.Value ?? "vs";
 
             await JSRuntime.InvokeAsync<object>("InitializeEditor",
-                EditorTheme, EditorLanguage 
+                EditorTheme, EditorLanguage, tempsave.Value
             );
 
             StateHasChanged();
