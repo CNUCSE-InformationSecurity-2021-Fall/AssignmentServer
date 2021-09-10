@@ -9,7 +9,7 @@
         <div>
             <h5>입력 예시</h5>
             <samp class="example">
-            <pre>@testInfo?.InputExample</pre>
+                <pre>@testInfo?.InputExample</pre>
             </samp>
         </div>
         <div>
@@ -54,12 +54,12 @@
     <div class="editor-container my-3">
 
     </div>
-    <div class="editor-actions w-100">
-        <button class="btn btn-secondary" id="ctSave" @onclick="SaveCodeTemp">임시저장 (Ctrl+S)</button>
-        <button class="btn btn-primary" id="ctExecute" @onclick="DoTest">테스트 (Ctrl+E)</button>
-        <button class="btn btn-primary" id="ctSubmit" @onclick="SubmitCode">제출 (Ctrl+U)</button>
-    </div>
 </form>
+<div class="editor-actions w-100 mb-3">
+    <button class="btn btn-secondary" id="ctSave" @onclick="SaveCodeTemp">임시저장 (Ctrl+S)</button>
+    <button class="btn btn-primary" id="ctExecute" @onclick="DoTest">테스트 (Ctrl+E)</button>
+    <button class="btn btn-primary" id="ctSubmit" @onclick="SubmitCode">제출 (Ctrl+U)</button>
+</div>
 
 <div class="codetester-result">
     <div class="execution-result">
@@ -79,7 +79,7 @@
     private string EditorLanguage;
     private string EditorTheme;
 
-    private CodeTestInfo  testInfo;
+    private CodeTestInfo testInfo;
     private string executionResult;
 
     private bool IsTesting;
