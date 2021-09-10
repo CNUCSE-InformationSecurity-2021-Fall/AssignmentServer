@@ -83,7 +83,7 @@ namespace AssignmentServer.BlazorApp.Actions
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
-                Arguments = $"run -v /code/{instanceId}:/code-runner -it " +
+                Arguments = $"run -v /code/{instanceId}:/code-runner -i " +
                             $"--name={instanceId} --memory={memoryLimit}m " +
                             $"coderunner:release /exec.sh {language} {instanceId}",
                 FileName = "/usr/bin/docker"
