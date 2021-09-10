@@ -93,6 +93,15 @@
         await JSRuntime.InvokeVoidAsync("alert", "임시저장이 완료되었습니다!");
     }
 
+    private void UpdateExecutionResult(string result)
+    {
+        InvokeAsync(() =>
+        {
+            executionResult = result;
+            StateHasChanged();
+        });
+    }
+
     private async Task DoTest()
     {
         if (IsTesting)
@@ -103,8 +112,7 @@
 
         IsTesting = true;
 
-        executionResult = "";
-        StateHasChanged();
+        UpdateExecutionResult("");
 
         var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
 
@@ -112,19 +120,12 @@
         {
             if (report.Type == CodeTesterReportType.OutputReceived)
             {
-                lock (executionResult)
-                {
-                    executionResult += report.Output;
-                    StateHasChanged();
-                }
+                UpdateExecutionResult(executionResult + report.Output);
             }
             else if (report.Type == CodeTesterReportType.ExitReport)
             {
-                lock (executionResult)
-                {
-                    executionResult += $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
-                    StateHasChanged();
-                }
+                var nextResult = executionResult + $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
+                UpdateExecutionResult(nextResult);
 
                 IsTesting = false;
             }
@@ -139,7 +140,8 @@
         contextAction.SubmitCode(EditorLanguage, currentCode,
             result =>
             {
-                executionResult = $"";
+                var execResult = $"";
+                UpdateExecutionResult(execResult);
             });
     }
 
