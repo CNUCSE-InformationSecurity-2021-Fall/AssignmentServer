@@ -89,6 +89,7 @@
         if (firstRender)
         {
             contextAction = new CodeTesterContextAction(AssignmentId, CurrentStudent);
+            testInfo = contextAction.TestInfo;
 
             var language = await localStorage.GetAsync<string>("editor-language");
             var theme = await localStorage.GetAsync<string>("editor-theme");

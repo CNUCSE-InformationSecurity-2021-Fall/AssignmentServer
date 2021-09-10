@@ -113,13 +113,14 @@ namespace AssignmentServer.BlazorApp.Actions
             return process;
         }
 
-        public async Task ExecuteCode(string language, string code, Action<CodeTesterBackgroundReport> reporter)
+        public void ExecuteCode(string language, string code, Action<CodeTesterBackgroundReport> reporter)
         {
-            
+            SpawnDocker(language, code, TestInfo.MemoryLimit, reporter);
         }
 
-        public async Task SubmitCode(string language, string code, Action reporter)
+        public void SubmitCode(string language, string code, Action reporter)
         {
+            var totalCases = TestInfo.Testcases.Count;
 
         }
     }

@@ -10,6 +10,8 @@ namespace AssignmentServer.BlazorApp.Data
         public string InputExample { get; set; }
         public string OutputExample { get; set; }
 
+        public int MemoryLimit { get; set; }
+
         public List<CodeTestCase> Testcases { get; set; }
     }
     
