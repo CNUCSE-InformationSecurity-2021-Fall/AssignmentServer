@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AssignmentServer.BlazorApp.Actions
@@ -68,8 +69,13 @@ namespace AssignmentServer.BlazorApp.Actions
             }
         }
 
-        private Process SpawnDocker(string language, string input, int memoryLimit, Action<CodeTesterBackgroundReport> reporter)
+        private Process SpawnDocker(string instanceId, string language, string code, string input, int memoryLimit, Action<CodeTesterBackgroundReport> reporter)
         {
+            var outputBuilder = new StringBuilder();
+
+            Directory.CreateDirectory($"/code/{instanceId}");
+            File.WriteAllText($"/code/{instanceId}/code", code);
+
             var process = new Process();
             process.StartInfo = new ProcessStartInfo()
             {
@@ -77,37 +83,49 @@ namespace AssignmentServer.BlazorApp.Actions
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
-                Arguments = $"-it --memory={memoryLimit}m code-runner-{language}",
+                Arguments = $"run -v /code/{instanceId}:/code-runner -it " +
+                            $"--name={instanceId} --memory={memoryLimit}m " +
+                            $"coderunner:release /exec.sh {language} {instanceId}",
                 FileName = "/usr/bin/docker"
             };
 
             process.OutputDataReceived += (e, args) => {
                 if (args.Data is null)
                     return;
+                
+                if (reporter is not null)
+                    reporter(new()
+                    {
+                        Type = CodeTesterReportType.OutputReceived,
+                        Output = args.Data,
+                        ExitCode = -1,
+                        Miliseconds = -1
+                    });
 
-                reporter(new()
-                {
-                    Type = CodeTesterReportType.OutputReceived,
-                    Output = args.Data,
-                    ExitCode = -1,
-                    Miliseconds = -1
-                });
+                outputBuilder.Append(args.Data);
             };
 
             process.Exited += (e, args) =>
             {
-                reporter(new()
+                if (reporter is not null)
+                    reporter(new()
+                    {
+                        Type = CodeTesterReportType.ExitReport,
+                        Output = outputBuilder.ToString(),
+                        ExitCode = process.ExitCode,
+                        Miliseconds = (process.ExitTime - process.StartTime).Milliseconds
+                    });
+
+                Process.Start(new ProcessStartInfo()
                 {
-                    Type = CodeTesterReportType.ExitReport,
-                    Output = null,
-                    ExitCode = process.ExitCode,
-                    Miliseconds = (process.ExitTime - process.StartTime).Milliseconds
+                    FileName = "/usr/bin/docker",
+                    Arguments = $"rm {instanceId}"
                 });
             };
 
             process.Start();
 
-            process.StandardInput.WriteLine(input);
+            process.StandardInput.WriteLine();
             process.StandardInput.Close();
 
             return process;
@@ -115,13 +133,42 @@ namespace AssignmentServer.BlazorApp.Actions
 
         public void ExecuteCode(string language, string code, Action<CodeTesterBackgroundReport> reporter)
         {
-            SpawnDocker(language, code, TestInfo.MemoryLimit, reporter);
+            SpawnDocker(Guid.NewGuid().ToString(), language, code, TestInfo.InputExample, TestInfo.MemoryLimit, reporter);
         }
 
-        public void SubmitCode(string language, string code, Action reporter)
+        public void SubmitCode(string language, string code, Action<CodeTestSubmitResult> reporter)
         {
             var totalCases = TestInfo.Testcases.Count;
+            var acceptedCases = 0;
+            var runningTimeAvg = new List<int>();
 
+            foreach (var testCase in TestInfo.Testcases)
+            {
+                var dockerProcess = SpawnDocker(
+                    Guid.NewGuid().ToString(),
+                    language, code, testCase.Input, TestInfo.MemoryLimit, 
+                    report =>
+                    {
+                        if (report.Type == CodeTesterReportType.ExitReport)
+                        {
+                            if (testCase.Output == report.Output.Trim())
+                            {
+                                acceptedCases++;
+                                runningTimeAvg.Add(report.Miliseconds);
+                            }
+                        }
+                    });
+                dockerProcess.WaitForExit();
+            }
+
+            var score = (int)Math.Round(10 * (acceptedCases / (double)totalCases));
+            reporter(new CodeTestSubmitResult()
+            {
+                AcceptedCases = acceptedCases,
+                TotalCases = totalCases,
+                AverageRunningTime = (int)Math.Round(runningTimeAvg.Average()),
+                Score = score
+            });
         }
     }
 }
