@@ -81,13 +81,13 @@
     private string EditorTheme;
 
     private CodeTestInfo testInfo;
-    private string executionResult;
+    private string executionResult = "";
 
     private bool IsTesting;
 
     private async Task SaveCodeTemp()
     {
-        var currentCode = JSRuntime.InvokeAsync<string>("GetCurrentCode");
+        var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
 
         await localStorage.SetAsync($"editor-tempcode-{AssignmentId}", currentCode);
         await JSRuntime.InvokeVoidAsync("alert", "임시저장이 완료되었습니다!");
@@ -129,7 +129,14 @@
 
     private void SubmitCode()
     {
+        executionResult = "";
 
+        var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
+        contextAction.SubmitCode(EditorLanguage, currentCode,
+            result =>
+            {
+                executionResult = $"";
+            });
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -143,7 +150,7 @@
 
             var language = await localStorage.GetAsync<string>("editor-language");
             var theme = await localStorage.GetAsync<string>("editor-theme");
-            var tempsave = await localStorage.GetAsync<string>($"editor-tempsave-{AssignmentId}");
+            var tempsave = await localStorage.GetAsync<string>($"editor-tempcode-{AssignmentId}");
 
             EditorLanguage = language.Value ?? "c";
             EditorTheme = theme.Value ?? "vs";
