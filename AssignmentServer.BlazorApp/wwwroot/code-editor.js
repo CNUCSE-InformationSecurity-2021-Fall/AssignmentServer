@@ -25,6 +25,8 @@
                 document.querySelector("#ctExecute").click();
             else if (e.code === "KeyU")
                 document.querySelector("#ctSubmit").click();
+            else
+                return;
 
             e.preventDefault();
         }
