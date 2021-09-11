@@ -152,7 +152,7 @@
         contextAction.SubmitCode(EditorLanguage, currentCode,
             result =>
             {
-                var execResult = $"";
+                var execResult = $"\n\n{result.AcceptedCases}/{result.TotalCases}개 통과";
                 UpdateExecutionResult(execResult);
             });
     }
