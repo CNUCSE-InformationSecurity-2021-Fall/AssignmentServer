@@ -77,6 +77,8 @@ namespace AssignmentServer.BlazorApp.Actions
             File.WriteAllText($"/code/{instanceId}/code", code);
 
             var process = new Process();
+            var processStartTime = DateTime.MinValue;
+
             process.EnableRaisingEvents = true;
             process.StartInfo = new ProcessStartInfo()
             {
@@ -114,7 +116,7 @@ namespace AssignmentServer.BlazorApp.Actions
                         Type = CodeTesterReportType.ExitReport,
                         Output = outputBuilder.ToString(),
                         ExitCode = process.ExitCode,
-                        Miliseconds = (process.ExitTime - process.StartTime).Milliseconds
+                        Miliseconds = (process.ExitTime - processStartTime).Milliseconds
                     });
 
                 Process.Start(new ProcessStartInfo()
@@ -128,6 +130,8 @@ namespace AssignmentServer.BlazorApp.Actions
 
             process.Start();
             process.BeginOutputReadLine();
+
+            processStartTime = process.StartTime;
 
             process.StandardInput.WriteLine();
             process.StandardInput.Close();

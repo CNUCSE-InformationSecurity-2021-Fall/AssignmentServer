@@ -63,9 +63,12 @@
 </div>
 
 <div class="codetester-result">
+    @if (executionResult.Length > 0)
+    {
     <div class="execution-result">
         @executionResult
     </div>
+    }
     <div class="assessment-result">
         <div class="alert alert-primary">
             아직 제출되지 않았습니다. 코드를 제출해주세요!
@@ -115,7 +118,6 @@
         }
 
         IsTesting = true;
-
         UpdateExecutionResult("");
 
         var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
