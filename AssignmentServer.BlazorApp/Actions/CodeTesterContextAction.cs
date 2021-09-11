@@ -174,7 +174,6 @@ namespace AssignmentServer.BlazorApp.Actions
             {
                 AcceptedCases = acceptedCases,
                 TotalCases = totalCases,
-                AverageRunningTime = (int)Math.Round(runningTimeAvg.Average()),
                 Score = score
             });
         }

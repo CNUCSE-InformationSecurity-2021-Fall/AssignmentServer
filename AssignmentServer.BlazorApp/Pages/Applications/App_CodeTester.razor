@@ -59,7 +59,7 @@
 <div class="editor-actions w-100 mb-3">
     <button class="btn btn-secondary" id="ctSave" @onclick="SaveCodeTemp">임시저장 (Ctrl+S)</button>
 
-    @if (!IsTesting)
+    @if (!IsRunning)
     {
         <button class="btn btn-primary" id="ctExecute" @onclick="DoTest">테스트 (Ctrl+E)</button>
         <button class="btn btn-primary" id="ctSubmit" @onclick="SubmitCode">제출 (Ctrl+U)</button>
@@ -94,7 +94,7 @@
     private CodeTestInfo testInfo;
     private string executionResult = "";
 
-    private bool IsTesting;
+    private bool IsRunning;
 
     private async Task SaveCodeTemp()
     {
@@ -111,7 +111,7 @@
             executionResult = result;
 
             if (isFinished)
-                IsTesting = false;
+                IsRunning = false;
 
             StateHasChanged();
         });
@@ -119,13 +119,13 @@
 
     private async Task DoTest()
     {
-        if (IsTesting)
+        if (IsRunning)
         {
             await JSRuntime.InvokeVoidAsync("alert", "테스트가 실행중입니다...");
             return;
         }
 
-        IsTesting = true;
+        IsRunning = true;
         UpdateExecutionResult("");
 
         var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
@@ -146,14 +146,15 @@
 
     private async Task SubmitCode()
     {
-        executionResult = "";
+        IsRunning = true;
+        UpdateExecutionResult("", false);
 
         var currentCode = await JSRuntime.InvokeAsync<string>("GetCurrentCode");
         contextAction.SubmitCode(EditorLanguage, currentCode,
             result =>
             {
                 var execResult = $"\n\n{result.AcceptedCases}/{result.TotalCases}개 통과";
-                UpdateExecutionResult(execResult);
+                UpdateExecutionResult(execResult, isFinished: true);
             });
     }
 
