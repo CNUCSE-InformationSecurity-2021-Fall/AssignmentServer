@@ -133,7 +133,7 @@ namespace AssignmentServer.BlazorApp.Actions
 
             processStartTime = process.StartTime;
 
-            process.StandardInput.WriteLine();
+            process.StandardInput.WriteLine(input);
             process.StandardInput.Close();
 
             return process;
