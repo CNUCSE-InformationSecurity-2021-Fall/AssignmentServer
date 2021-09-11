@@ -45,6 +45,11 @@
         {
             pivotObject.Timestamp.Add(DateTime.Now);
 
+            if (pivotObject.Score < submitInfo.Score &&
+                submitInfo.Score >= 0 &&
+                submitInfo.Score <= 10)
+                pivotObject.Score = submitInfo.Score;
+
             if (pivotObject.GetType() != typeof(StudentSubmitRaw))
             {
                 var type = pivotObject.GetType();
