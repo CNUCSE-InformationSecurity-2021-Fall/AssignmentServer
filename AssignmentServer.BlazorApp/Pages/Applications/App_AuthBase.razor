@@ -12,8 +12,11 @@
     protected T GetSubmitInfo<T>() where T : StudentSubmitRaw
     {
         var cabinetPath = $"Cabinet/Students/{CurrentStudent.Id}/Assignments/{AssignmentId}.json";
-        var cabinetJson = File.ReadAllText(cabinetPath);
 
+        if (!File.Exists(cabinetPath))
+            return null;
+
+        var cabinetJson = File.ReadAllText(cabinetPath);
         return JsonConvert.DeserializeObject<T>(cabinetJson);
     }
 
