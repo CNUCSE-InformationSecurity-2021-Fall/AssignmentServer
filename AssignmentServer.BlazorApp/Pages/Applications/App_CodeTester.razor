@@ -65,9 +65,9 @@
 <div class="codetester-result">
     @if (executionResult.Length > 0)
     {
-    <div class="execution-result">
+    <pre class="execution-result mb-3">
         @executionResult
-    </div>
+    </pre>
     }
     <div class="assessment-result">
         <div class="alert alert-primary">
@@ -130,7 +130,7 @@
             }
             else if (report.Type == CodeTesterReportType.ExitReport)
             {
-                var nextResult = executionResult + $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
+                var nextResult = executionResult + $"\n\n실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
                 UpdateExecutionResult(nextResult, isFinished: true);
             }
         });
