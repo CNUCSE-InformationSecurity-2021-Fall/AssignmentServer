@@ -22,13 +22,10 @@
         if (submitInfo is null)
             return;
 
-        var cabinetPath = $"Cabinet/Students/{CurrentStudent.Id}/Assignments/{AssignmentId}.json";
-        T pivotObject;
+        T pivotObject = GetSubmitInfo<T>();
 
-        if (File.Exists(cabinetPath))
+        if (pivotObject is not null)
         {
-            var json = File.ReadAllText(cabinetPath);
-            pivotObject = JsonConvert.DeserializeObject<T>(json);
             pivotObject.Timestamp.Add(DateTime.Now);
 
             if (pivotObject.GetType() != typeof(StudentSubmitRaw))
@@ -51,6 +48,7 @@
             pivotObject = submitInfo;
         }
 
+        var cabinetPath = $"Cabinet/Students/{CurrentStudent.Id}/Assignments/{AssignmentId}.json";
         var submitData = JsonConvert.SerializeObject(pivotObject);
         File.WriteAllText(cabinetPath, submitData, Encoding.UTF8);
     }
