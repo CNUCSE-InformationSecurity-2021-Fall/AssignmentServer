@@ -6,6 +6,7 @@
 @code {
     [Parameter]
     public string AssignmentId { get; set; }
+    public Assignment AssignmentInfo { get; set; }
 
     public StudentInfo CurrentStudent;
 
@@ -18,6 +19,19 @@
 
         var cabinetJson = File.ReadAllText(cabinetPath);
         return JsonConvert.DeserializeObject<T>(cabinetJson);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var cabinetPath = $"Cabinet/Assignments/{AssignmentId}/meta.json";
+        
+        if (File.Exists(cabinetPath))
+        {
+            var cabinetJson = File.ReadAllText(cabinetPath);
+            AssignmentInfo = JsonConvert.DeserializeObject<Assignment>(cabinetJson);
+        }
+
+        await base.OnInitializedAsync();
     }
 
     protected void SubmitAssignment<T>(T submitInfo) where T : StudentSubmitRaw
