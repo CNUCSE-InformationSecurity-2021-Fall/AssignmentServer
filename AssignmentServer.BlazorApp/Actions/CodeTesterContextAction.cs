@@ -77,6 +77,7 @@ namespace AssignmentServer.BlazorApp.Actions
             File.WriteAllText($"/code/{instanceId}/code", code);
 
             var process = new Process();
+            process.EnableRaisingEvents = true;
             process.StartInfo = new ProcessStartInfo()
             {
                 CreateNoWindow = true,

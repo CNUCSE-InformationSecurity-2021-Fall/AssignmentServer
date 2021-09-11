@@ -93,11 +93,15 @@
         await JSRuntime.InvokeVoidAsync("alert", "임시저장이 완료되었습니다!");
     }
 
-    private void UpdateExecutionResult(string result)
+    private void UpdateExecutionResult(string result, bool isFinished = false)
     {
         InvokeAsync(() =>
         {
             executionResult = result;
+
+            if (isFinished)
+                IsTesting = false;
+
             StateHasChanged();
         });
     }
@@ -125,9 +129,7 @@
             else if (report.Type == CodeTesterReportType.ExitReport)
             {
                 var nextResult = executionResult + $"실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
-                UpdateExecutionResult(nextResult);
-
-                IsTesting = false;
+                UpdateExecutionResult(nextResult, isFinished: true);
             }
         });
     }
