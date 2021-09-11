@@ -9,6 +9,13 @@
 
     public StudentInfo CurrentStudent;
 
+    protected T GetSubmitInfo<T>() where T : StudentSubmitRaw
+    {
+        var cabinetPath = $"Cabinet/Students/{CurrentStudent.Id}/Assignments/{AssignmentId}.json";
+        var cabinetJson = File.ReadAllText(cabinetPath);
+
+        return JsonConvert.DeserializeObject<T>(cabinetJson);
+    }
 
     protected void SubmitAssignment<T>(T submitInfo) where T : StudentSubmitRaw
     {
