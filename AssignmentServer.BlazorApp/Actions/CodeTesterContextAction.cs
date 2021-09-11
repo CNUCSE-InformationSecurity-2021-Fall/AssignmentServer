@@ -105,7 +105,7 @@ namespace AssignmentServer.BlazorApp.Actions
                         Miliseconds = -1
                     });
 
-                outputBuilder.Append(args.Data);
+                outputBuilder.AppendLine(args.Data);
             };
 
             process.Exited += (e, args) =>
