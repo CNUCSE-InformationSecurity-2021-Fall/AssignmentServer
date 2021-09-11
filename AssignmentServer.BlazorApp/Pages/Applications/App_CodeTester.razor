@@ -58,14 +58,16 @@
 
 <div class="editor-actions w-100 mb-3">
     <button class="btn btn-secondary" id="ctSave" @onclick="SaveCodeTemp">임시저장 (Ctrl+S)</button>
-    
+
     @if (!IsTesting)
     {
-    <button class="btn btn-primary" id="ctExecute" @onclick="DoTest">테스트 (Ctrl+E)</button>
-    <button class="btn btn-primary" id="ctSubmit" @onclick="SubmitCode">제출 (Ctrl+U)</button>
+        <button class="btn btn-primary" id="ctExecute" @onclick="DoTest">테스트 (Ctrl+E)</button>
+        <button class="btn btn-primary" id="ctSubmit" @onclick="SubmitCode">제출 (Ctrl+U)</button>
     }
-
-    <button class="btn btn-secondary disabled">코드 실행중입니다...</button>
+    else
+    {
+        <button class="btn btn-secondary disabled ml-1">코드 실행중입니다...</button>
+    }
 </div>
 
 <div class="codetester-result">
