@@ -126,7 +126,7 @@
         {
             if (report.Type == CodeTesterReportType.OutputReceived)
             {
-                UpdateExecutionResult(executionResult + report.Output);
+                UpdateExecutionResult(executionResult + "\n" + report.Output);
             }
             else if (report.Type == CodeTesterReportType.ExitReport)
             {
