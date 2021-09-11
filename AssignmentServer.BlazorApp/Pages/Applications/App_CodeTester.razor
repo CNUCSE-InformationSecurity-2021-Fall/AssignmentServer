@@ -138,7 +138,7 @@
             }
             else if (report.Type == CodeTesterReportType.ExitReport)
             {
-                var nextResult = executionResult + $"\n\n실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
+                var nextResult = $"{report.Output}\n\n실행 코드 {report.ExitCode}, 실행시간 {report.Miliseconds}ms";
                 UpdateExecutionResult(nextResult, isFinished: true);
             }
         });
