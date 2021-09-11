@@ -88,7 +88,7 @@ namespace AssignmentServer.BlazorApp.Actions
                 RedirectStandardOutput = true,
                 Arguments = $"run -v /code/{instanceId}:/code-runner -i " +
                             $"--name={instanceId} --memory={memoryLimit}m " +
-                            $"coderunner:release /exec.sh {language} {instanceId}",
+                            $"pknowledge/coderunner:release2 /exec.sh {language} {instanceId}",
                 FileName = "/usr/bin/docker"
             };
 
