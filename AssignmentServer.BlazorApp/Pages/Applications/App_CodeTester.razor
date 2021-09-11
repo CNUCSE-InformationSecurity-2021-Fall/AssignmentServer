@@ -153,7 +153,7 @@
         contextAction.SubmitCode(EditorLanguage, currentCode,
             result =>
             {
-                var execResult = $"{result.AcceptedCases}/{result.TotalCases}개 통과";
+                var execResult = $"{result.AcceptedCases}/{result.TotalCases}개 통과, {result.Score}/10 점으로 제출되었습니다.";
                 UpdateExecutionResult(execResult, isFinished: true);
             });
     }
