@@ -10,6 +10,44 @@
     public StudentInfo CurrentStudent;
 
 
+    protected void SubmitAssignment<T>(T submitInfo) where T : StudentSubmitRaw
+    {
+        if (submitInfo is null)
+            return;
+
+        var cabinetPath = $"Cabinet/Students/{CurrentStudent.Id}/Assignments/{AssignmentId}.json";
+        T pivotObject;
+
+        if (File.Exists(cabinetPath))
+        {
+            var json = File.ReadAllText(cabinetPath);
+            pivotObject = JsonConvert.DeserializeObject<T>(json);
+            pivotObject.Timestamp.Add(DateTime.Now);
+
+            if (pivotObject.GetType() != typeof(StudentSubmitRaw))
+            {
+                var type = pivotObject.GetType();
+                var pivotProperties = type.GetProperties();
+                var submitRawTypeProperties = typeof(StudentSubmitRaw).GetProperties();
+
+                var remains = pivotProperties
+                                .Where(property =>
+                                    !submitRawTypeProperties.Select(property => property.Name)
+                                                           .Contains(property.Name))
+                                .ToList();
+
+                remains.ForEach(property => property.SetValue(pivotObject, property.GetValue(submitInfo)));
+            }
+        }
+        else
+        {
+            pivotObject = submitInfo;
+        }
+
+        var submitData = JsonConvert.SerializeObject(pivotObject);
+        File.WriteAllText(cabinetPath, submitData, Encoding.UTF8);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)

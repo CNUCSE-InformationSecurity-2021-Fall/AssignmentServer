@@ -8,7 +8,8 @@ namespace AssignmentServer.BlazorApp.Data
     public class StudentSubmitRaw
     {
         public string AssignmentId { get; set; }
-        public DateTime[] Timestamp { get; set; }
+        public List<DateTime> Timestamp { get; set; }
+        public string ModuleId { get; set; }
         public int Score { get; set; }
     }
 }
