@@ -184,14 +184,9 @@
     private async Task UpdateEditorLanguage(ChangeEventArgs e)
     {
         EditorLanguage = e.Value as string;
-        var realLang = EditorLanguage;
-
-        // todo: remove this after exec.sh modified
-        if (EditorLanguage == "cs")
-            realLang = "csharp";
 
         await localStorage.SetAsync("editor-language", EditorLanguage);
-        await JSRuntime.InvokeVoidAsync("UpdateEditorLanguage", realLang);
+        await JSRuntime.InvokeVoidAsync("UpdateEditorLanguage", EditorLanguage);
     }
 
     private async Task UpdateEditorTheme(ChangeEventArgs e)
