@@ -159,8 +159,7 @@ namespace AssignmentServer.BlazorApp.Actions
                     {
                         if (report.Type == CodeTesterReportType.ExitReport)
                         {
-                            Console.WriteLine(report.Output);
-                            if (testCase.Output == report.Output.Trim())
+                            if (testCase.Output == report.Output)
                             {
                                 acceptedCases++;
                                 runningTimeAvg.Add(report.Miliseconds);
