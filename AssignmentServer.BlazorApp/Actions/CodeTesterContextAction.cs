@@ -159,11 +159,14 @@ namespace AssignmentServer.BlazorApp.Actions
                     {
                         if (report.Type == CodeTesterReportType.ExitReport)
                         {
-                            Console.WriteLine("{0}\n\n{1}", testCase.Output, report.Output);
-                            if (testCase.Output == report.Output)
+                            lock (runningTimeAvg)
                             {
-                                acceptedCases++;
-                                runningTimeAvg.Add(report.Miliseconds);
+                                Console.WriteLine("TEST=====\n{0}\n\nREAL=====\n{1}", testCase.Output, report.Output);
+                                if (testCase.Output == report.Output)
+                                {
+                                    acceptedCases++;
+                                    runningTimeAvg.Add(report.Miliseconds);
+                                }
                             }
                         }
                     });
