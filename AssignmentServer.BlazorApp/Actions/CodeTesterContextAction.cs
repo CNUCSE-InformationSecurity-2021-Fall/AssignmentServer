@@ -159,6 +159,7 @@ namespace AssignmentServer.BlazorApp.Actions
                     {
                         if (report.Type == CodeTesterReportType.ExitReport)
                         {
+                            Console.WriteLine("{0}\n\n{1}", testCase.Output, report.Output);
                             if (testCase.Output == report.Output)
                             {
                                 acceptedCases++;
