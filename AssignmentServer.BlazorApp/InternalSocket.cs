@@ -63,7 +63,7 @@ namespace AssignmentServer.BlazorApp
                     while (true)
                     {
                         Thread.Sleep(1000);
-                        Interlocked.Add(ref idleTime, 1);
+                        Interlocked.Increment(ref idleTime);
 
                         if (idleTime > idleTimeMax)
                         {
