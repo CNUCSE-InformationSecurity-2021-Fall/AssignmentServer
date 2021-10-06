@@ -1,0 +1,275 @@
+﻿@page "/e2ee-chat"
+
+<h3>End-to-End Encryption Chat Protocol (3E) Specification</h3>
+<p>최종 업데이트: ver 1.0, 2021-10-07</p>
+
+<div class="alert alert-primary">
+    이 문서는 충남대학교 2021학년도 학부 정보보호과목의 실습 진행을 위하여
+    서버 접근 정보 및 프로토콜에 대해 명세하고 있습니다. <br />
+    자료 참조에 문제가 있는 경우 <button @onclick="RevealMail">@MailHidden</button>을 통해 조교에게 연락하시기 바랍니다.
+</div>
+
+<div class="mb-4">
+    <h4>개요</h4>
+    <hr />
+    <p>
+        End-to-End Encryption Chat Suite (이하 E2EECS)는 TCP 소켓 통신 기반의 보안 채팅 솔루션입니다.
+        각 사용자 간에 송/수신되는 모든 메세지는 암호화되어야 하며 별다른 조치가 없는 경우 서버 상에서
+        평문을 확인할 수 없어야 합니다. 본 문서는 E2EECS의 클라이언트 개발자가 E2EE 클라이언트(이하 E2C)를 개발하는데 있어 필요한 내용을 담고 있으며 다음과 같이 구성되었습니다:</p>
+
+    <ul>
+        <li>프로토콜 기본 구조</li>
+        <li>서버 연결 및 종료 절차</li>
+        <li>키 교환 절차</li>
+        <li>메세지 처리 절차</li>
+    </ul>
+
+    <p>본 문서는 전체 개발 주기(2021-09-01 ~ 2021-12-15) 동안 계속 변경될 수 있습니다. 이 기간 중 E2C 개발을 지속하는 경우 반드시 최종 업데이트 일자와 문서 버전을 지속적으로 확인하시길 바랍니다.</p>
+
+    <h5>문서 변경내역</h5>
+    <ul>
+        <li>ver 1.0: 최초 릴리즈</li>
+    </ul>
+</div>
+
+<div class="mb-4">
+    <h4>페이로드 기본 구조</h4>
+    <hr />
+    <p>E2EECS는 서버와 클라이언트 사이의 통신을 위하여 3E(Triple-E) 프로토콜을 사용합니다. 해당 프로토콜을 따라 서버에 전송할 목적으로, 혹은 수신할 목적으로 생성된 바이트 시퀀스 전체를 3E 페이로드라고 하며, 3E 페이로드는 TCP를 통해 캡슐화되어 전송되는것을 원칙으로 합니다. 3E 페이로드는 크게 PREAMBLE, 헤더(Header)와 본문(Body)으로 나뉘며, 본문은 송/수신하는 통신의 종류에 따라 존재하지 않을 수 있습니다.</p>
+    <p>3E 페이로드는 UTF-8 인코딩을 통해 문자로 출력 가능한(printable) 바이트만으로 이루어져 있습니다. 헤더와 본문은 페이로드에서 제일 첫번째 빈 줄로 구분됩니다. 만일 페이로드 내에서 바이트시퀀스를 표현해야 할 경우, BASE64를 사용하는 것이 권장됩니다.</p>
+
+    <table class="text-center table-bordered m-3">
+        <tbody>
+            <tr>
+                <td class="p-2">3EPROTO</td>
+                <td class="p-2">METHOD</td>
+            </tr>
+            <tr>
+                <td class="p-2" colspan="2">HEADERS</td>
+            </tr>
+            <tr>
+                <td class="p-2" colspan="2">BLANK LINE (Mandatory If BODY Exists)</td>
+            </tr>
+            <tr>
+                <td class="p-2" colspan="2">BODY (Optional)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5>Preamble</h5>
+    <p>Preamble은 페이로드의 시작부터 처음으로 나오는 <code>\n</code>(<code>0x10</code>) 까지의 바이트 시퀀스를 의미합니다. 모든 3E 프로토콜 페이로드는 <code>3EPROTO</code>로 시작하여야 합니다. 이후 통신의 종류를 의미하는 Method가 지정되어야 하며 공백 문자(<code>0x20</code>)으로 구분됩니다.</p>
+
+    <h5>헤더</h5>
+    <p>헤더는 <code>Key:Value</code>와 같이 :(colon, <code>0x3a</code>)로 구분되는 형태로 열거된 데이터의 집합입니다. Key는 ASCII 알파벳 대역(대문자: <code>0x41</code>~<code>0x5A</code>, 소문자: <code>0x61</code>~<code>0x7A</code>)  내의 문자만을 허용하며 대소문자를 구분합니다. Value는 UTF-8 내의 모든 출력 가능 문자를 허용합니다. 헤더에는 메세지 송/수신자 신원이나 서버, 혹은 클라이언트가 부가적인 처리를 하기 위한 메타데이터 등이 포함될 수 있습니다. 다음 표는 3E 프로토콜에서 사용되는 대표적인 헤더들을 나열합니다.</p>
+
+    <table class="my-3 table-bordered text-center">
+        <thead>
+            <tr>
+                <th class="p-1">이름</th>
+                <th class="p-1">3E 표준에서 정의된 용도</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="p-1">Algo</td>
+                <td class="p-1">
+                    Key Exchange 단계에서 사용할 알고리즘을 지정할때 사용합니다. 블록 암호 알고리즘인 경우 뒤에 운영모드가 붙습니다.<br />
+                    e.g.) <code>AES-256-CBC</code>
+                </td>
+            </tr>
+            <tr>
+                <td class="p-1">Credential</td>
+                <td class="p-1">서버 연결시 사용할 신원명을 지정합니다. 신원명은 기존에 서버에 접속된 클라이언트들과 중복될 수 없습니다.</td>
+            </tr>
+            <tr>
+                <td class="p-1">Timestamp</td>
+                <td class="p-1">서버가 클라이언트에게 응답한 시각이 들어가는 헤더입니다. 클라이언트가 서버에게 전송하는 경우 해당 헤더와 관련하여 어떠한 동작도 수행하지 않습니다.</td>
+            </tr>
+            <tr>
+                <td class="p-1">Nonce</td>
+                <td class="p-1">메세지 송신시 메세지 송신 결과를 수신받기 위한 난수값입니다. 30비트 랜덤 BASE64값을 사용하는 것을 권장합니다.<br />
+                이 헤더는 반드시 포함될 필요는 없으나 존재하지 않는 경우 송신 결과를 수신할 수 없습니다.</td>
+            </tr>
+            <tr>
+                <td class="p-1">From</td>
+                <td class="p-1">메세지 송/수신시 송신자의 신원명이 들어가는 헤더입니다.</td>
+            </tr>
+            <tr>
+                <td class="p-1">To</td>
+                <td class="p-1">메세지 송신시 수신자의 신원명이 들어가는 헤더입니다.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h5>본문</h5>
+    <p>본문에는 보통 암호화된 메세지나 암호키가 포함됩니다. 필요한 경우 다른 정보가 포함될 수 있습니다.</p>
+</div>
+
+<div class="mb-4">
+    <h4>서버 연결 및 종료 절차</h4>
+    <hr />
+    <h5>서버에 연결하기</h5>
+    <p>암호화 통신을 위해 서버에 연결하려하는 경우 <code>CONNECT</code> 메서드를 사용합니다. 본문은 필요하지 않으며, <code>Credential</code> 헤더에 신원으로 사용할 UTF-8 문자열을 포함하여 전송합니다. 연결이 성공한 경우 서버는 <code>ACCEPT</code> 메서드로 응답을 전송하며 제출한 신원명을 Body에 제시합니다. 만일 연결에 실패할 경우 (신원명 중복, 소켓 오류 등) 서버는 <code>DENY</code> 메서드로 응답하며 사용하던 TCP 연결은 해제됩니다. 연결 실패 원인을 추적하기 위해 Body에 오류 메세지가 제시됩니다.</p>
+
+    <p>다음은 클라이언트에서 <code>CONNECT</code> 메서드를 사용하여 서버에 연결하는 예시입니다.</p>
+
+    <pre class="alert alert-info">
+3EPROTO CONNECT
+Credential: CNU-InfoSecUser
+    </pre>
+
+    <p>만약 접속에 성공한 경우 다음 응답을 수신할 수 있습니다.</p>
+
+    <pre class="alert alert-warning">
+3EPROTO ACCEPT
+Timestamp: 2021-10-07 10:00:23
+
+CNU-InfoSecUser
+    </pre>
+
+    <p>그러나 접속에 실패한 경우 다음과 같은 응답을 수신하며, TCP 연결이 해제됩니다. 다음 예시에서는 중복된 신원명을 사용했을 경우를 가정합니다.</p>
+    <pre class="alert alert-warning">
+3EPROTO DENY
+Timestamp: 2021-10-07 10:00:23
+
+Duplicated Username: CNU-InfoSecUser
+    </pre>
+
+    <div class="alert alert-danger">
+        같은 IP주소로 중복 접속을 시도할 경우 기존 연결은 해제됩니다.
+    </div>
+
+    <h5>서버와의 연결 해제하기</h5>
+    <p>서버와 연결된 클라이언트가 현재 신원명을 무효화하고 연결을 해제하고자 하는 경우 <code>DISCONNECT</code> 메서드를 사용합니다. <code>Credential</code> 헤더에는 해당 연결에서 사용하던 신원명이 포함되어야 하며 불일치할 경우 해당 요청은 무시됩니다. 정상적으로 요청이 수신될 경우 서버는 <code>BYE</code> 메서드의 응답을 전송하며 현재까지 유지하고 있던 TCP 연결은 해제됩니다.</p>
+
+    <p>다음은 서버와의 연결을 정상적으로 해제하는 상황을 가정한 예시입니다.</p>
+
+    <pre class="alert alert-info">
+3EPROTO DISCONNECT
+Credential: CNU-InfoSecUser
+    </pre>
+
+    <pre class="alert alert-warning">
+3EPROTO BYE
+Timestamp: 2021-10-07 10:00:23
+    </pre>
+
+    <div class="alert alert-danger">
+        연결이 되지 않은 상태에서 이후의 동작(연결 해제, 메세지 전송, Key 교환 요청 등)은 <code>DENY</code> 응답만을 수신하며 해당 TCP 연결은 해제됩니다.
+    </div>
+</div>
+
+<div class="mb-4">
+    <h4>키 교환</h4>
+    <hr />
+    <p>이 단락에서는 암호화/복호화를 위한 키 교환 과정을 다룹니다. 현재 버전의 E2EECS에서 키 교환은 클라이언트간에 평문으로 이루어집니다. 서로 대화를 한 적이 없는 사용자 간에는 키를 교환하지 않았으므로 대화를 시작하기 전에 키를 교환하여야 합니다. 메세지의 암호화에는 <code>AES-256-CBC</code>가 이용되므로 256비트 키와 128비트 IV(Initialization Vector)가 각 사용자 간에 교환될 필요가 있습니다. 키와 IV는 Body에 순서대로 제시되고, <code>\n</code>(<code>0x10</code>)으로 구분됩니다. 키 생성은 기존의 키를 사용하여도 무방하나, 보안을 위하여 각 사용자 간의 공통된 랜덤 키를 키 교환 시점에서 생성하여 교환할 것을 권장합니다.</p>
+    <p>키 교환 요청은 <code>KEYXCHG</code>메서드로 이루어집니다. 헤더 <code>Algo</code>에 사용하고자 하는 암호 알고리즘과 운영모드를, <code>From</code>에 자신의 신원명을, <code>To</code>에 키 교환을 하고자 하는 사용자의 신원명을 제시하고, Body에 전달하고자 하는 키와 IV를 제시합니다. 현재 버전의 E2EECS 표준에서는 <code>AES-256-CBC</code>만이 사용되므로 <code>Algo</code>헤더의 값은 <code>AES-256-CBC</code>가 되어야 합니다. 키 교환에 성공한 경우 <code>KEYXCHGOK</code> 메서드로 응답이 수신되며 <code>From</code>헤더에 키를 교환하고자 하는 사용자의 신원명이 제시됩니다.</p>
+    <p>다음은 사용자 <code>CNU-InfoSecUser2</code>에게 키 교환을 요청하는 과정을 나타낸 것입니다.</p>
+
+    <pre class="alert alert-info">
+3EPROTO KEYXCHG
+Algo: AES-256-CBC
+From: CNU-InfoSecUser
+To: CNU-InfoSecUser2
+
+WhnmchdhP6aS28bbp6WXElQacdJK59cGwlTDY0FKmKU=
+f8uA/XqfIIpdnED+yFj0+w==
+    </pre>
+
+    <pre class="alert alert-warning">
+3EPROTO KEYXCHGOK
+Algo: AES-256-CBC
+From: CNU-InfoSecUser2
+Timestamp: 2021-10-07 10:00:23
+    </pre>
+
+    <p>만일 키 교환이 실패했을 경우 <code>KEYXCHGFAIL</code> 메서드로 응답이 수신됩니다. 키 교환이 실패하는 경우는 1) 이미 키를 교환했거나, 2) 사용자가 키 교환 요청을 처리하는 도중 오류가 발생했을 경우입니다. 키를 변경하고자 하는 경우 위의 키 교환 요청에서 메서드를 <code>KEYXCHGRST</code>로 변경하여 다시 요청하면 됩니다.</p>
+    <p>다음 예시는 키 교환이 중복하여 요청되었을 경우의 상황을 가정한 것입니다.</p>
+
+    <pre class="alert alert-info">
+3EPROTO KEYXCHG
+Algo: AES-256-CBC
+From: CNU-InfoSecUser
+To: CNU-InfoSecUser2
+
+WhnmchdhP6aS28bbp6WXElQacdJK59cGwlTDY0FKmKU=
+f8uA/XqfIIpdnED+yFj0+w==
+    </pre>
+
+    <pre class="alert alert-warning">
+3EPROTO KEYXCHGFAIL
+From: CNU-InfoSecUser2
+Timestamp: 2021-10-07 10:00:23
+
+Duplicated Key Exchange Request
+    </pre>
+
+    <pre class="alert alert-info">
+3EPROTO KEYXCHGRST
+Algo: AES-256-CBC
+From: CNU-InfoSecUser
+To: CNU-InfoSecUser2
+
+WhnmchdhP6aS28bbp6WXElQacdJK59cGwlTDY0FKmKU=
+f8uA/XqfIIpdnED+yFj0+w==
+    </pre>
+
+    <pre class="alert alert-warning">
+3EPROTO KEYXCHGOK
+Algo: AES-256-CBC
+From: CNU-InfoSecUser2
+Timestamp: 2021-10-07 10:00:23
+    </pre>
+
+    <p>위에 제시된 키 교환 예시는 발신자의 시점에서 서술된 것입니다. 키 교환 요청 수신자의 경우 반대의 경우로 고려하여 응답을 작성하면 됩니다. 이 경우, Timestamp 헤더는 포함하지 않아도 됩니다.</p>
+</div>
+
+<div class="mb-4">
+    <h4>메세지 처리절차</h4>
+    <hr />
+    <p>이 단락에서는 송신과 수신과정에서 사용자에게 보여질 메세지를 처리하는 방법에 대해 설명합니다. 다음 내용은 위에서 설명한 서버 연결 및 키 교환이 모두 정상적으로 이루어졌음을 전제한 내용이므로, 제대로 진행되지 않을 경우 위의 내용을 다시 확인하여 보시기 바랍니다.</p>
+
+    <h5>메세지 송신</h5>
+
+    <p>메세지 송신은 <code>MSGSEND</code>메서드를 이용하여 송신합니다. <code>From</code> 헤더에 송신자의 신원명을, <code>To</code> 헤더에 수신자의 신원명을 제시합니다. 메세지는 본문에 제시하며 사전에 교환된 키와 IV로 암호화된 후 BASE-64로 인코딩 되어야 합니다. 만일 송신에 성공한 경우 <code>MSGSENDOK</code> 메서드로 서버에서 응답을 받을 수 있으며 실패한 경우 <code>MSGSENDFAIL</code> 메서드의 응답을 받습니다. 사전에 키를 교환하지 않거나 암호화 하지 않은 경우에도 메세지는 송신될 수 있으나 정상적으로 수신되지 않습니다. 송신 결과는 헤더에 <code>Nonce</code>값을 제시했을 때 수신할 수 있으며 제시하지 않는 경우 송신 결과는 수신되지 않습니다.</p>
+
+    <p>다음은 메세지 송신의 예시입니다.</p>
+
+    <pre class="alert alert-info">
+3EPROTO MSGSEND
+From: CNU-InfoSecUser
+To: CNU-InfoSecUser2
+Nonce: A/Xqf
+
+WhnmchdhP6aS28bbp6WXElQacdJK59cGwlTDY0FKmKUf8uA/XqfIIpdnED+yFj0+w==
+    </pre>
+
+    <pre class="alert alert-warning">
+3EPROTO MSGSENDOK
+Nonce: A/Xqf
+Timestamp: 2021-10-07 10:00:23
+    </pre>
+
+    <p>혹은 메세지 송신에 실패한 경우 다음 응답을 받을 수 있습니다.</p>
+
+    <pre class="alert alert-warning">
+3EPROTO MSGSENDFAIL
+Nonce: A/Xqf
+Timestamp: 2021-10-07 10:00:23
+    </pre>
+    <h5>메세지 수신</h5>
+
+    <p>메세지는 비동기적으로 임의의 시간에 수신됩니다. <code>MSGRECV</code> 메서드를 통해 들어온 메세지는 <code>From</code> 헤더와 <code>To</code> 헤더를 가집니다. 본문에는 BASE64 형태의 암호화된 메세지가 포함되며 수신자는 이 메세지를 복호화하여 평문을 획득할 수 있습니다. 만일 사전에 키를 교환하지 않은 사용자의 메세지거나 정상적으로 암호화 되지 않은 경우, 혹은 BASE64가 아닌 경우 메세지 처리를 중단할 수 있습니다.</p>
+
+    <p>다음은 메세지 수신의 예시입니다.</p>
+
+</div>
+
+@code {
+    public string MailHidden = "메일보기";
+
+    private void RevealMail()
+    {
+        MailHidden = "knowledge@o.cnu.ac.kr";
+    }
+}

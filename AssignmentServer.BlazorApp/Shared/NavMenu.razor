@@ -7,6 +7,11 @@
 
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
     <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="/e2ee-chat">
+                <span class="oi oi-cog" aria-hidden="true"></span> <span>E2EE Chat Docs</span>
+            </NavLink>
+        </li>
         @if (logged)
         {
             <li class="nav-item px-3">
