@@ -14,7 +14,7 @@ namespace AssignmentServer.BlazorApp
         private int masterPort = -1;
         private int waitingSockets = 0;
 
-        private int idleTimeMax = -1;
+        private int idleTimeMax = 300;
         private int idleTime = 0;
 
         public Func<int, byte[], byte[]> OnDataReceived;
@@ -86,6 +86,11 @@ namespace AssignmentServer.BlazorApp
 
         private void AcceptCallback(IAsyncResult iar)
         {
+            if (masterSocket is null)
+            {
+                return;
+            }
+
             Interlocked.Decrement(ref waitingSockets);
 
             if (waitingSockets == 0)
