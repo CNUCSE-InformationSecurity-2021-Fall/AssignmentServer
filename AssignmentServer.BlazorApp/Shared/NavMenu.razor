@@ -106,7 +106,7 @@
 
             if (logged)
             {
-                assignments = Info.AssignmentStatus;
+                assignments = Info.AssignmentStatus.OrderByDescending(sub => sub.Id).ToList();
             }
 
             StateHasChanged();
